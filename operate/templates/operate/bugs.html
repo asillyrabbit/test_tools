@@ -9,39 +9,44 @@
                 <input type="text" class="form-control" name="mname" id="mid" placeholder="请输入模块名称"
                        required/>
                 <div class="input-group-append">
-                    <button id="load" class="btn btn-success" type="submit">统计</button>
+                    <button id="load" class="btn btn-success load" type="submit">统计</button>
                 </div>
             </div>
         </form>
     </div>
+
 {% endblock search %}
 {% block content %}
-    <style type="text/css">
-        .t_head, .t_body {
-            text-align: center;
-        }
-    </style>
-    {% if file_found == 1 %}
-        <div>
-            <table class="table table-bordered col-xs-12">
-                <thead class="thead-light t_head">
-                <tr>
-                    <th>项目名</th>
-                    <th>文件名</th>
-                    <th>操作</th>
-                </tr>
-                </thead>
-                <tbody class="t_body">
-                <tr>
-                    <td>{{ mname }}</td>
-                    <td>{{ test_report_name }}</td>
-                    <td><a href="{% url 'operate:download' %}">下载</a></td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-    {% elif mname %}
-        <p>没有查询到任何结果，请检查模块名是否正确！</p>
-    {% endif %}
+    <div class="col-xs-12">
+        <style type="text/css">
+            .t_head, .t_body {
+                text-align: center;
+            }
+        </style>
+        {% if file_found == 1 %}
+            <div>
+                <table class="table table-bordered col-xs-12">
+                    <thead class="thead-light t_head">
+                    <tr>
+                        <th>项目名</th>
+                        <th>文件名</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody class="t_body">
+                    <tr>
+                        <td>{{ mname }}</td>
+                        <td>{{ test_report_name }}</td>
+                        <td><a href="{% url 'operate:download' %}">下载</a></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        {% elif mname %}
+            <div class="alert alert-info col-md-6">
+                <strong>没有查询到任何结果，请检查模块名是否正确！</strong>
+            </div>
+        {% endif %}
+    </div>
 {% endblock content %}
 

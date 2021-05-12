@@ -226,9 +226,12 @@ def qrcode(requests):
         doc_infos = cur.fetchone()
         cur.close()
 
-        doc_infos_len = len(doc_infos)
+        flag = 0
 
-        context = {'doc_infos': doc_infos, 'doc_infos_len': doc_infos_len}
+        if doc_infos is None:
+            flag = 1
+
+        context = {'doc_infos': doc_infos, 'flag': flag}
 
         return render(requests, 'operate/qrcode.html', context)
 

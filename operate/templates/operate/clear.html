@@ -5,17 +5,15 @@
 
 {% block content %}
     <style type="text/css">
-        #userid, #mobile, #username, #openid, #apptype,#create{
+        #userid, #mobile, #username, #openid, #apptype, #create {
             background-color: white;
             border: 0px;
         }
-    #opt{
-        background-color: cornflowerblue;
-    }
-
     </style>
     {% if list_len < 1 %}
-        <p class="text-dark" style="margin-top: 10px">没有查询到任务记录！</p>
+        <div class="alert alert-info col-md-6">
+            <strong>没有查询到任务记录！</strong>
+        </div>
     {% else %}
         <div class="table-responsive-md">
             <table class="table table-bordered" style="margin-top: 10px">
@@ -27,7 +25,7 @@
                     <th>OPENID</th>
                     <th>用户类型</th>
                     <th style="font-size: small">清SCAN表？</th>
-{#                    <th>创建时间</th>#}
+                    {#                    <th>创建时间</th>#}
                     <th>操作</th>
                 </tr>
                 </thead>
@@ -57,10 +55,11 @@
                                     <option>清</option>
                                 </select>
                             </td>
-{#                            <td><input id="create" class="form-control" name="create" type="text"#}
-{#                                       value="{{ userinfo.5 }}" size="5"#}
-{#                                       readonly/></td>#}
-                            <td><input class="form-control" id="opt" style="color: white" type="submit" value="操作"/></td>
+                            {#                            <td><input id="create" class="form-control" name="create" type="text"#}
+                            {#                                       value="{{ userinfo.5 }}" size="5"#}
+                            {#                                       readonly/></td>#}
+                            <td><input class="form-control btn btn-primary" id="opt" type="submit" value="操作"/>
+                            </td>
                         </tr>
                     </form>
                 {% endfor %}
