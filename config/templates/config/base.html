@@ -1,0 +1,49 @@
+{% load bootstrap4 %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1,shrink-to-fit=no">
+    <link rel="shortcut icon" href="{% static 'image/favicon.ico' %}">
+    <title>测试工具平台</title>
+    {% bootstrap_css %}
+    {% bootstrap_javascript jquery='full' %}
+</head>
+<body>
+<nav class="navbar navbar-expand-md navbar-light bg-light mb-4 border">
+    <a class="navbar-brand" href="{% url 'config:index' %}">测试工具平台</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse"
+            aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarCollapse">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'operate:update' %}">更新环境</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'operate:bugs' %}">统计日报</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'operate:search' %}">清理账号</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'operate:qrcode' %}">生成二维码</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<main role="main" class="container">
+    <div class="pb-1 mb-1">
+        {% block page_header %}{% endblock page_header %}
+    </div>
+    <div>{% block search %}{% endblock search %}</div>
+    <div>
+        {% block content %}{% endblock content %}
+    </div>
+</main>
+</body>
+</html>

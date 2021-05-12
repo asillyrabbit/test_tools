@@ -1,0 +1,72 @@
+{% extends "operate/search.html" %}
+{% load bootstrap4 %}
+
+
+
+{% block content %}
+    <style type="text/css">
+        #userid, #mobile, #username, #openid, #apptype,#create{
+            background-color: white;
+            border: 0px;
+        }
+    #opt{
+        background-color: cornflowerblue;
+    }
+
+    </style>
+    {% if list_len < 1 %}
+        <p class="text-dark" style="margin-top: 10px">没有查询到任务记录！</p>
+    {% else %}
+        <div class="table-responsive-md">
+            <table class="table table-bordered" style="margin-top: 10px">
+                <thead class="thead-light" style="text-align: center">
+                <tr>
+                    <th>用户ID</th>
+                    <th>手机号</th>
+                    <th>姓名</th>
+                    <th>OPENID</th>
+                    <th>用户类型</th>
+                    <th style="font-size: small">清SCAN表？</th>
+{#                    <th>创建时间</th>#}
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for userinfo in userinfos %}
+                    <form class="form-inline" method="post" action="{% url 'operate:clear' %}">
+                        {% csrf_token %}
+                        <tr>
+                            <td><input id="userid" class="form-control" name="userid" type="text"
+                                       value="{{ userinfo.0 }}" size="1"
+                                       readonly/></td>
+                            <td><input id="mobile" class="form-control" name="mobile" type="text"
+                                       value="{{ userinfo.1 }}" size="8"
+                                       readonly/></td>
+                            <td><input id="username" class="form-control" name="username" type="text"
+                                       value="{{ userinfo.2 }}" size="1"
+                                       readonly/></td>
+                            <td><input id="openid" class="form-control" name="openid" type="text"
+                                       value="{{ userinfo.3 }}" size="25"
+                                       readonly/></td>
+                            <td><input id="apptype" class="form-control" name="apptype" type="text"
+                                       value="{{ userinfo.4 }}" size="1"
+                                       readonly/></td>
+                            <td>
+                                <select class="form-control" id="scan" name="scan" style="width: auto;">
+                                    <option>不清</option>
+                                    <option>清</option>
+                                </select>
+                            </td>
+{#                            <td><input id="create" class="form-control" name="create" type="text"#}
+{#                                       value="{{ userinfo.5 }}" size="5"#}
+{#                                       readonly/></td>#}
+                            <td><input class="form-control" id="opt" style="color: white" type="submit" value="操作"/></td>
+                        </tr>
+                    </form>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+{% endblock content %}
+

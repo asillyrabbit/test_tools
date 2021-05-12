@@ -1,0 +1,26 @@
+{% extends "config/base.html" %}
+{% load static %}
+
+{% block page_header %}
+    <style>
+    a {
+        margin-top: 1px;
+    }
+    </style>
+    <div class="jumbotron media">
+        <div class="media-body">
+            <h1 class="display-3">测试工具平台</h1>
+            <p class="lead">一个能提升工作效率的平台！</p>
+            <a class="btn btn-primary" href="{% url 'operate:update' %}" role="button">更新环境</a>
+            <a class="btn btn-primary" href="{% url 'operate:bugs' %}" role="button">统计日报</a>
+            <a class="btn btn-primary" href="{% url 'operate:search' %}" role="button">清理账号</a>
+            <a class="btn btn-primary" href="{% url 'operate:qrcode' %}" role="button">生成二维码</a>
+            <a class="btn btn-secondary disabled" href="#" role="button">开放平台</a>
+            <a class="btn btn-secondary disabled" href="#" role="button">接口自动化</a>
+            <a class="btn btn-secondary disabled" href="#" role="button">UI自动化</a>
+        </div>
+        <img src="{% static 'image/zhiliao.png' %}" alt="zhiliao"
+             class="align-self-center mr-3 rounded-circle img-fluid" style="width:80px;max-width: 20%">
+    </div>
+{% endblock page_header %}
+

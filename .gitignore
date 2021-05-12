@@ -1,0 +1,5 @@
+__pycache__/
+.idea/
+tt_env/
+db.sqlite3
+

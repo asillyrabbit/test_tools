@@ -1,0 +1,76 @@
+{% extends "config/base.html" %}
+{% load bootstrap4 %}
+
+{% block search %}
+    <form class="form-inline" method="post" action="{% url 'operate:qrcode' %}">
+        {% csrf_token %}
+        <div class="input-group">
+            <input name="mobile" type="text" class="form-control"
+                   oninput="setCustomValidity(''); checkValidity(); setCustomValidity(validity.valid ? '' :'请输入正确的手机号！');"
+                   pattern="^1[345678][0-9]{9}$" placeholder="请输入手机号" required/>
+            <div>
+                <button class="btn btn-success" type="submit">搜索</button>
+            </div>
+        </div>
+    </form>
+{% endblock %}
+
+{% block content %}
+    <div class="table-responsive-md col-xs-12">
+        {% if doc_infos_len > 0 %}
+            <table class="table table-bordered col-xs-12" style="margin-top: 10px">
+                <thead class="thead-light">
+                <tr>
+                    <th>医生ID</th>
+                    <th>姓名</th>
+                    <th>手机号</th>
+                    <th>执业医院</th>
+                    <th>生成类型</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tr>
+                    <td name="userid">{{ doc_infos.0 }}</td>
+                    <td>{{ doc_infos.1 }}</td>
+                    <td>{{ doc_infos.2 }}</td>
+                    <td>{{ doc_infos.3 }}</td>
+                    <td>
+                        <select id="otype" name="otype">
+                            <option>医生二维码</option>
+                            <option>医拉医二维码</option>
+                        </select>
+                    </td>
+                    <td>
+                        <input class="opt" type="button" value="操作">
+                    </td>
+                    <script>
+                        $('.opt').click(function () {
+                            var otype = $("#otype").val()
+                            $.ajax({
+                                    url: '/opt/recode/',
+                                    type: 'get',
+                                    data: {
+                                        'otype': otype,
+                                        'userid': {{ doc_infos.0 }},
+                                    },
+                                    beforeSend: function () {
+                                        document.getElementById('result').innerHTML = '<div class="spinner-border text-primary" role="status">\n' +
+                                            '  <span class="sr-only">Loading...</span>\n' +
+                                            '</div>';
+                                    },
+                                    success: function (response) {
+                                        document.getElementById('result').innerHTML = response;
+                                    }
+                                }
+                            )
+                        })
+                    </script>
+                </tr>
+            </table>
+        {% elif doc_infos_len == 0 %}
+            <p>111</p>
+        {% endif %}
+        <div id="result"></div>
+    </div>
+{% endblock %}
+

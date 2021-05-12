@@ -1,0 +1,86 @@
+{% extends "config/base.html" %}
+{% load bootstrap4 %}
+
+{% block content %}
+    <script type="text/javascript">
+        window.onload = function () {
+            let tableLine = document.getElementById("seq");
+            for (let i = 0; i < tableLine.rows.length; i++) {
+                tableLine.rows[i].cells[0].innerHTML = (i + 1);
+            }
+        }
+    </script>
+    <style type="text/css">
+    #opt{
+        background-color: cornflowerblue;
+        border: 1px solid dodgerblue;
+        border-radius:8px;
+        color: white;
+        padding:9px 18px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 1px 2px 0 rgba(0,0,0,0.19);
+    }
+    .chead,.onum,.states,.opt{
+        text-align: center;
+        vertical-align: middle!important;
+    }
+    .cname{
+        vertical-align: middle!important;
+    }
+
+    </style>
+    <div class="col-xs-12">
+        <table class="table table-bordered">
+            <thead class="chead thead-light">
+            <tr>
+                <th>序号</th>
+                <th>描述</th>
+                <th>状态</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody id="seq">
+            {% for com_info in com_infos %}
+                <tr>
+                    <td class="onum"></td>
+                    <td class="cname">{{ com_info.name }}</td>
+                    <td class="states" id="{{ com_info.ident }}">未执行</td>
+                    <td class="opt">
+                        <button class="{{ com_info.ident }}" id="opt">操作</button>
+                    </td>
+                    <script>
+                        $('.{{ com_info.ident }}').click(function () {
+                            $.ajax({
+                                url: '/opt/state/',
+                                type: 'get',
+                                dataType: 'json',
+                                data: {
+                                    ident: '{{ com_info.ident }}'
+                                },
+                                beforeSend: function () {
+                                    document.getElementById('{{ com_info.ident }}').innerHTML = '执行中...';
+                                },
+                                success: function (response) {
+                                    document.getElementById('{{ com_info.ident }}').innerHTML = response.result;
+                                    document.getElementById('succlogs').innerHTML = response.msg;
+                                    document.getElementById('errlogs').innerHTML = response.msg;
+
+                                }
+                            })
+                        })
+                    </script>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <div class="alert alert-success" id="succmsg" style="display:none">
+            <p id="succlogs"></p>
+        </div>
+        <div class="alert alert-danger" id="errmsg" style="display:none">
+            <p id="errlogs"></p>
+        </div>
+    </div>
+{% endblock %}
