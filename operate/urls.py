@@ -12,4 +12,7 @@ urlpatterns = [
     path('state/', views.state, name='state'),
     path('qrcode/', views.qrcode, name='qrcode'),
     path('recode/', views.recode, name='recode'),
+    path('oplat/', views.oplat, name='oplat'),
+    path('platopt/', views.platopt, name='platopt'),
+    path('postatus/', views.postatus, name='postatus'),
 ]

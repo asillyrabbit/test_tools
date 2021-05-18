@@ -1,0 +1,152 @@
+{% extends "config/base.html" %}
+{% load bootstrap4 %}
+
+
+{% block page_header %}
+    <div>
+        <h3 class="text-dark">清理销售账号：</h3>
+    </div>
+{% endblock %}
+{% block search %}
+    <form class="form-inline" method="post" action="{% url 'operate:oplat' %}">
+        {% csrf_token %}
+        <div class="input-group">
+            <input name="mobile" type="text" class="form-control"
+                   oninput="setCustomValidity(''); checkValidity(); setCustomValidity(validity.valid ? '' :'请输入正确的手机号！');"
+                   pattern="^1[345678][0-9]{9}$" placeholder="请输入手机号" required/>
+            <div>
+                <button class="btn btn-success" type="submit">查询</button>
+            </div>
+        </div>
+    </form>
+{% endblock %}
+
+{% block content %}
+    <script type="text/javascript">
+        window.onload = function () {
+            let tableLine = document.getElementById("seq");
+            for (let i = 0; i < tableLine.rows.length; i++) {
+                tableLine.rows[i].cells[0].innerHTML = (i + 1);
+            }
+        }
+    </script>
+    <style type="text/css">
+        tbody tr td,th {
+            vertical-align: middle !important;
+        }
+    </style>
+    <div>
+        <div class="table-responsive-md col-xs-12">
+            {% if sale_info %}
+                <table class="table table-bordered col-xs-12 mt-1">
+                    <thead class="thead-light">
+                    <tr>
+                        <th>姓名</th>
+                        <th>手机号</th>
+                        <th style="display: none">openid</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td id="sname">{{ sale_info.0 }}</td>
+                        <td id="smobile">{{ sale_info.1 }}</td>
+                        <td id="sopenid" style="display: none">{{ sale_info.2 }}</td>
+                        <td id="status">未执行</td>
+                        <td>
+                            <input type="button" id="sclear" class="btn btn-primary" value="清理"
+                                   onclick="javascript:{this.disabled=true}"/>
+                        </td>
+                        <script>
+                            $('#sclear').click(function () {
+                                {# var()用于input值 #}
+                                {# text()用于html元素文本 #}
+                                let sname = $("#sname").text();
+                                let smobile = $("#smobile").text()
+                                let sopenid = $("#sopenid").text()
+                                $.ajax({
+                                    url: '/opt/platopt/',
+                                    type: 'get',
+                                    dataType: 'json',
+                                    data: {
+                                        'sname': sname,
+                                        'smobile': smobile,
+                                        'sopenid': sopenid
+                                    },
+                                    beforeSend: function () {
+                                        document.getElementById('status').innerHTML = '执行中...';
+                                    },
+                                    success: function (response) {
+                                        document.getElementById('status').innerHTML = response.status;
+                                        document.getElementById('clear_status').innerHTML = response.clear_msg;
+                                    }
+                                })
+                            })
+                        </script>
+                    </tr>
+                    </tbody>
+                </table>
+                <div id="clear_status"></div>
+            {% elif flag == 0 %}
+                <div class="alert alert-info col-md-6 mt-1">
+                    <strong>没有查询到任何信息，请检查手机号是否正确！</strong>
+                </div>
+            {% endif %}
+        </div>
+        <div style="margin-top: 80px">
+            <h3 class="text-dark">结算与模板消息：</h3>
+            <div class="table-responsive-md col-xs-12">
+                <table class="table table-bordered col-xs-12" style="margin-top: 10px">
+                    <thead class="thead-light">
+                    <tr>
+                        <th style="text-align: center">序号</th>
+                        <th>描述</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody id="seq">
+                    {% for com_info in com_infos %}
+                        <tr>
+                            <td style="text-align: center"></td>
+                            <td style="text-align: left">{{ com_info.name }}</td>
+                            <td id="{{ com_info.ident }}">未执行</td>
+                            <td>
+                                <input type="button" class="{{ com_info.ident }} btn btn-primary" value="执行"/>
+                            </td>
+                            <script>
+                                $('.{{ com_info.ident }}').click(function () {
+                                    $.ajax({
+                                        url: '/opt/postatus/',
+                                        type: 'get',
+                                        dataType: 'json',
+                                        data: {
+                                            ident: '{{ com_info.ident }}'
+                                        },
+                                        beforeSend: function () {
+                                            document.getElementById('{{ com_info.ident }}').innerHTML = '执行中...';
+                                        },
+                                        success: function (response) {
+                                            document.getElementById('{{ com_info.ident }}').innerHTML = response.result;
+                                            document.getElementById('succlogs').innerHTML = response.msg;
+                                            document.getElementById('errlogs').innerHTML = response.msg;
+
+                                        }
+                                    })
+                                })
+                            </script>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="alert alert-success" id="succmsg" style="display:none">
+                <p id="succlogs"></p>
+            </div>
+            <div class="alert alert-danger" id="errmsg" style="display:none">
+                <p id="errlogs"></p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

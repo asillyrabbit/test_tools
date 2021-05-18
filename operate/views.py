@@ -180,31 +180,16 @@ def state(requests):
 
     ident = requests.GET['ident']
 
-    succ = "<a href='#succmsg' onclick=\"document.getElementById('succmsg').style.display=''\">成功</a>"
-    fail = "<a href='#errmsg' onclick=\"document.getElementById('errmsg').style.display=''\">失败</a>"
-
-    results = {
-        'result': '成功',
-        'msg': '',
-    }
-
     if ident == 'up_testing':
-        stdin, stdout, stderr = conn.exec_command(up_testing)
-        logs = stdout.read().decode()
-        logs = logs.replace('\n', '<br/>').lstrip('b\'').rstrip('\'')
-        if 'error' in logs:
-            results['result'] = fail
-            results['msg'] = logs
-        else:
-            results['result'] = succ
-            results['msg'] = logs
-
+        results = exe_commd(ident, conn, up_testing)
     if ident == 're_doc':
-        stdin, stdout, stderr = conn.exec_command(re_doc)
+        results = exe_commd(ident, conn, re_doc)
     if ident == 're_pat':
-        stdin, stdout, stderr = conn.exec_command(re_pat)
+        results = exe_commd(ident, conn, re_pat)
     if ident == 're_back':
-        stdin, stdout, stderr = conn.exec_command(re_back)
+        results = exe_commd(ident, conn, re_back)
+
+    conn.close()
 
     return JsonResponse(results)
 
@@ -272,3 +257,130 @@ def recode(requests):
     result = '<div class ="alert alert-success"><strong>操作成功！</strong><br/>请重新登录应用（微信或APP），查看最新二维码。</div>'
 
     return HttpResponse(result)
+
+
+def oplat(requests):
+    verify_data = ComInfo.objects.get(ident='verify_data')
+    auto_verify = ComInfo.objects.get(ident='auto_verify')
+    st_withdraw = ComInfo.objects.get(ident='st_withdraw')
+    s_t_msg = ComInfo.objects.get(ident='s_t_msg')
+
+    com_infos = []
+    com_infos.append(verify_data)
+    com_infos.append(auto_verify)
+    com_infos.append(st_withdraw)
+    com_infos.append(s_t_msg)
+
+    context = {'com_infos': com_infos}
+
+    if requests.method != 'POST':
+        return render(requests, 'operate/oplat.html', context)
+    else:
+        mobile = requests.POST['mobile']
+        query_sql = f"select name,mobile,openid from gyy_sales_t where mobile='{mobile}' limit 1"
+
+        dbinfo = eval(EnvInfo.objects.get(ident='TestDB').info)
+        mydb = MyDB(**dbinfo)
+        con = mydb.connect()
+        cur = con.cursor()
+        cur.execute(query_sql)
+        sale_info = cur.fetchone()
+        con.close()
+
+        flag = 1
+        if sale_info is None:
+            flag = 0
+
+        context = {'sale_info': sale_info, 'flag': flag, 'com_infos': com_infos}
+
+        return render(requests, 'operate/oplat.html', context)
+
+
+def platopt(requests):
+    name = requests.GET['sname'] + '_del'
+    mobile = requests.GET['smobile']
+    openid = requests.GET['sopenid']
+
+    new_mobile = int(mobile) + 1000000000
+
+    update_sql = f"update gyy_sales_t set name='{name}',mobile='{new_mobile}',openid='' where mobile='{mobile}'"
+
+    dbinfo = eval(EnvInfo.objects.get(ident='TestDB').info)
+    mydb = MyDB(**dbinfo)
+    con = mydb.connect()
+    cur = con.cursor()
+    cur.execute(update_sql)
+    con.commit()
+    con.close()
+
+    if openid != '':
+        del_redis = ComInfo.objects.get(ident='del_redis').command
+        del_redis = del_redis.replace('keywords', f'ggy::s::sale::openid::{openid}')
+
+        server_info = eval(EnvInfo.objects.get(ident='TestServer').info)
+        myssh = MySSH(**server_info)
+        conn = myssh.connect()
+        stdin, stdout, stderr = conn.exec_command(del_redis)
+        conn.close()
+
+    status = '<p class="text-success">成功</p>'
+    clear_msg = '<div class ="alert alert-success"><strong>操作成功！</strong><br/>请退出微信，重新登录。</div>'
+
+    results = {
+        'status': status,
+        'clear_msg': clear_msg
+    }
+
+    return JsonResponse(results)
+
+
+def postatus(requests):
+    verify_data = ComInfo.objects.get(ident='verify_data').command
+    auto_verify = ComInfo.objects.get(ident='auto_verify').command
+    st_withdraw = ComInfo.objects.get(ident='st_withdraw').command
+    s_t_msg = ComInfo.objects.get(ident='s_t_msg').command
+
+    server_info = eval(EnvInfo.objects.get(ident='TestServer').info)
+
+    myssh = MySSH(**server_info)
+    conn = myssh.connect()
+
+    ident = requests.GET['ident']
+
+    if ident == 'verify_data':
+        results = exe_commd(ident, conn, verify_data)
+    if ident == 'auto_verify':
+        results = exe_commd(ident, conn, auto_verify)
+    if ident == 'st_withdraw':
+        results = exe_commd(ident, conn, st_withdraw)
+    if ident == 's_t_msg':
+        results = exe_commd(ident, conn, s_t_msg)
+
+    conn.close()
+
+    return JsonResponse(results)
+
+
+# 执行服务器命令公共方法
+def exe_commd(ident, conn, commd):
+    succ = "<a href='#succmsg' onclick=\"document.getElementById('succmsg').style.display=''\">成功</a>"
+    fail = "<a href='#errmsg' onclick=\"document.getElementById('errmsg').style.display=''\">失败</a>"
+
+    results = {
+        'result': '',
+        'msg': ''
+    }
+
+    stdin, stdout, stderr = conn.exec_command(commd)
+    logs = stdout.read().decode()
+    logs = logs.replace('\n', '<br/>').lstrip('b\'').rstrip('\'')
+    if len(logs) == 0:
+        logs = '没有日志输出！'
+    if ('error' in logs) or ('Error' in logs):
+        results['result'] = fail
+        results['msg'] = logs
+    else:
+        results['result'] = succ
+        results['msg'] = logs
+
+    return results
