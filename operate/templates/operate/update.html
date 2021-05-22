@@ -54,8 +54,8 @@
                                 },
                                 success: function (response) {
                                     document.getElementById('{{ com_info.ident }}').innerHTML = response.result;
-                                    document.getElementById('succlogs').innerHTML = response.msg;
-                                    document.getElementById('errlogs').innerHTML = response.msg;
+                                    document.getElementById('succlogs').innerHTML = response.succ_msg;
+                                    document.getElementById('errlogs').innerHTML = response.fail_msg;
 
                                 }
                             })
@@ -65,11 +65,7 @@
             {% endfor %}
             </tbody>
         </table>
-        <div class="alert alert-success" id="succmsg" style="display:none">
-            <p id="succlogs"></p>
-        </div>
-        <div class="alert alert-danger" id="errmsg" style="display:none">
-            <p id="errlogs"></p>
-        </div>
+        <div id="succlogs"></div>
+        <div id="errlogs"></div>
     </div>
 {% endblock %}

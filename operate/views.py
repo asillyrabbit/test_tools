@@ -363,12 +363,13 @@ def postatus(requests):
 
 # 执行服务器命令公共方法
 def exe_commd(ident, conn, commd):
-    succ = "<a href='#succmsg' onclick=\"document.getElementById('succmsg').style.display=''\">成功</a>"
-    fail = "<a href='#errmsg' onclick=\"document.getElementById('errmsg').style.display=''\">失败</a>"
+    succ = "<a href='#succmsg'>成功</a>"
+    fail = "<a href='#errmsg'>失败</a>"
 
     results = {
         'result': '',
-        'msg': ''
+        'succ_msg': '',
+        'fail_msg': ''
     }
 
     stdin, stdout, stderr = conn.exec_command(commd)
@@ -378,9 +379,9 @@ def exe_commd(ident, conn, commd):
         logs = '没有日志输出！'
     if ('error' in logs) or ('Error' in logs):
         results['result'] = fail
-        results['msg'] = logs
+        results['fail_msg'] = f"<div class=\"alert alert-danger\"><p>{logs}</p></div>"
     else:
         results['result'] = succ
-        results['msg'] = logs
+        results['succ_msg'] = f"<div class=\"alert alert-success\"><p>{logs}</p></div>"
 
     return results
