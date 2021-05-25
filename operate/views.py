@@ -262,14 +262,14 @@ def recode(requests):
 def oplat(requests):
     verify_data = ComInfo.objects.get(ident='verify_data')
     auto_verify = ComInfo.objects.get(ident='auto_verify')
-    st_withdraw = ComInfo.objects.get(ident='st_withdraw')
     s_t_msg = ComInfo.objects.get(ident='s_t_msg')
+    st_withdraw = ComInfo.objects.get(ident='st_withdraw')
 
     com_infos = []
     com_infos.append(verify_data)
     com_infos.append(auto_verify)
-    com_infos.append(st_withdraw)
     com_infos.append(s_t_msg)
+    com_infos.append(st_withdraw)
 
     context = {'com_infos': com_infos}
 
@@ -332,6 +332,72 @@ def platopt(requests):
     }
 
     return JsonResponse(results)
+
+
+def querysales(requests):
+    callback = requests.GET['callback']
+    term = requests.GET['term']
+
+    dbinfo = eval(EnvInfo.objects.get(ident='TestDB').info)
+    mydb = MyDB(**dbinfo)
+    con = mydb.connect()
+    cur = con.cursor()
+
+    date_now = time.strftime("%Y%m", time.localtime())
+
+    query_infos = f"select id,name from gyy_sales_t where id in(select sale_id from gyy_sales_month_account_t where account_month='{date_now}') and openid !='' and name like'%{term}%'order by id;"
+
+    cur.execute(query_infos)
+    sales_infos = cur.fetchall()
+
+    sales_name_id = []
+    for sales_info in sales_infos:
+        sales_name_id.append(f"{sales_info[1]}({sales_info[0]})")
+
+    con.close()
+
+    salse = f"{callback}({sales_name_id})"
+
+    return HttpResponse(salse)
+
+
+def modmonth(requests):
+    name = requests.GET['salename']
+    sale_id = str(name).split('(')[1].strip(')')
+
+    year = int(time.strftime("%Y", time.localtime()))
+    month = int(time.strftime("%m", time.localtime()))
+
+    now_month = time.strftime("%Y%m",time.localtime())
+
+    if month == 1:
+        year -= 1
+        month = 12
+    else:
+        if month > 10:
+            month -= 1
+        else:
+            month -= 1
+            month = f"0{month}"
+
+    pre_month = f"{year}{month}"
+
+    update_1 = f"update gyy_sales_month_account_t set account_month = '{pre_month}' where sale_id='{sale_id}';"
+    update_2 = f"update gyy_sales_account_log_t set account_month = '{pre_month}' where sale_id='{sale_id}';"
+
+    dbinfo = eval(EnvInfo.objects.get(ident='TestDB').info)
+    mydb = MyDB(**dbinfo)
+    con = mydb.connect()
+    cur = con.cursor()
+
+    cur.execute(update_1)
+    cur.execute(update_2)
+    con.commit()
+    con.close()
+
+    succ_msg = f"<div class =\"alert alert-success\"><strong>操作成功！</strong><br/>账期已由{now_month}调整为{pre_month}，下一步可以进行销售结算操作。</div>"
+
+    return HttpResponse(succ_msg)
 
 
 def postatus(requests):

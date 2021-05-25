@@ -11,6 +11,6 @@
 
 
 ### 启动
-- gunicorn test_tools.wsgi -w 2 -b 0.0.0.0:8000 -D
+- gunicorn test_tools.wsgi -w 2 -b 0.0.0.0:8000 -D --access-logfile FILE
 
 

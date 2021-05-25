@@ -14,5 +14,7 @@ urlpatterns = [
     path('recode/', views.recode, name='recode'),
     path('oplat/', views.oplat, name='oplat'),
     path('platopt/', views.platopt, name='platopt'),
+    path('querysales/', views.querysales, name='querysales'),
+    path('modmonth/', views.modmonth, name='modmonth'),
     path('postatus/', views.postatus, name='postatus'),
 ]
