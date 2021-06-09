@@ -39,6 +39,8 @@ def search(request):
             userinfo[4] = '医生'
         if userinfo[4] == 3:
             userinfo[4] = '泰康用户'
+        if userinfo[4] == 5:
+            userinfo[4] = '广盛康'
 
         userinfo[5] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(userinfo[5]))
 
@@ -72,6 +74,8 @@ def clear(request):
         command = f"{clear_doc} {userid} {openid} {scan}"
     if apptype == '泰康用户':
         command = f"{clear_pat} {userid} {openid} 3"
+    if apptype == '广盛康':
+        command = f"{clear_pat} {userid} {openid} 5"
 
     myssh = MySSH(**server_info)
     conn = myssh.connect()
