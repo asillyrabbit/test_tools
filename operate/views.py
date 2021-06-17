@@ -68,6 +68,11 @@ def clear(request):
     clear_doc = ComInfo.objects.get(ident='doc').command
     clear_pat = ComInfo.objects.get(ident='pat').command
 
+    dbinfo = eval(EnvInfo.objects.get(ident='TestDB').info)
+    mydb = MyDB(**dbinfo)
+    con = mydb.connect()
+    cur = con.cursor()
+
     if apptype == '患者':
         command = f"{clear_pat} {userid} {openid} 1"
     if apptype == '医生':
@@ -76,6 +81,9 @@ def clear(request):
         command = f"{clear_pat} {userid} {openid} 3"
     if apptype == '广盛康':
         command = f"{clear_pat} {userid} {openid} 5"
+        up_sql = f"update gyy_cooperation_user_t set mobile={mobile}+100000000,name='作废卡' where mobile='{mobile}'"
+        cur.execute(up_sql)
+        con.commit()
 
     myssh = MySSH(**server_info)
     conn = myssh.connect()
@@ -83,11 +91,8 @@ def clear(request):
     out = stdout.read()
     conn.close()
 
+    # 验证清理结果
     query_info = f"select mobile from gyy_user_t where id={userid}"
-    dbinfo = eval(EnvInfo.objects.get(ident='TestDB').info)
-    mydb = MyDB(**dbinfo)
-    con = mydb.connect()
-    cur = con.cursor()
     cur.execute(query_info)
     new_mobile = cur.fetchall()[0][0]
     con.close()
