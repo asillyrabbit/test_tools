@@ -377,7 +377,7 @@ def modmonth(requests):
     year = int(time.strftime("%Y", time.localtime()))
     month = int(time.strftime("%m", time.localtime()))
 
-    now_month = time.strftime("%Y%m",time.localtime())
+    now_month = time.strftime("%Y%m", time.localtime())
 
     if month == 1:
         year -= 1
@@ -391,8 +391,8 @@ def modmonth(requests):
 
     pre_month = f"{year}{month}"
 
-    update_1 = f"update gyy_sales_month_account_t set account_month = '{pre_month}' where sale_id='{sale_id}';"
-    update_2 = f"update gyy_sales_account_log_t set account_month = '{pre_month}' where sale_id='{sale_id}';"
+    update_1 = f"update gyy_sales_month_account_t set account_month = '{pre_month}' where sale_id='{sale_id}' and account_month='{now_month}';"
+    update_2 = f"update gyy_sales_account_log_t set account_month = '{pre_month}' where sale_id='{sale_id}' and account_month='{now_month}';"
 
     dbinfo = eval(EnvInfo.objects.get(ident='TestDB').info)
     mydb = MyDB(**dbinfo)
