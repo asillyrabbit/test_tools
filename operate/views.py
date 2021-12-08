@@ -4,6 +4,7 @@ from config.models import EnvInfo, ComInfo
 from django.http import HttpResponse, FileResponse, JsonResponse
 import time
 import os
+import json
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 test_report_name = '知了v1.2.0-测试日报.xlsx'
@@ -460,3 +461,151 @@ def exe_commd(ident, conn, commd):
         results['succ_msg'] = f"<div class=\"alert alert-success\"><p>{logs}</p></div>"
 
     return results
+
+
+# 2021-12-2新增
+def qmodule(requests):
+    callback = requests.GET['callback']
+    term = requests.GET['term']
+
+    # 执行命令集
+    server_info = eval(EnvInfo.objects.get(ident='chandao').info)
+    remote_dir = "/opt/qbugs/"
+    query_commd = f"python3 {remote_dir}qmodule.py {term}"
+
+    # 链接服务器
+    myssh = MySSH(**server_info)
+    conn = myssh.connect()
+
+    # 执行重命名、统计操作
+    stdin, stdout, stderr = conn.exec_command(query_commd)
+    names = stdout.read().decode()
+    names = eval(names)
+    names = list(names.values())
+
+    m_name = f"{callback}({names})"
+
+    return HttpResponse(m_name)
+
+
+def newbugs(requests):
+    if requests.method != 'POST':
+        return render(requests, 'operate/newbugs.html')
+    else:
+        mname = requests.POST['mname']
+
+    # 执行命令集
+    server_info = eval(EnvInfo.objects.get(ident='chandao').info)
+    remote_dir = "/opt/qbugs/"
+    query_commd = f"python3 {remote_dir}qbugs.py {mname}"
+
+    # 链接服务器
+    myssh = MySSH(**server_info)
+    conn = myssh.connect()
+
+    stdin, stdout, stderr = conn.exec_command(query_commd)
+    bugs = stdout.read().decode()
+    bugs = eval(bugs)
+    bugs_len = len(bugs)
+
+    totals, opened, type_dict, level_dict, n_list, t_list, o_list = data_format(bugs)
+
+    name_list, to_list, op_list = dict_sort(n_list, t_list, o_list)
+
+    type_data, type_name = format_dict(type_dict)
+    level_data, level_name = format_dict(level_dict)
+
+    context = {'bugs': bugs, 'totals': totals, 'opened': opened, 'type_dict': type_dict, 'level_dict': level_dict,
+               'name_list': name_list, 'to_list': to_list, 'op_list': op_list, 'type_data': type_data,
+               'type_name': type_name, 'level_data': level_data, 'level_name': level_name, 'bugs_len': bugs_len}
+
+    return render(requests, 'operate/newbugs.html', context)
+
+
+def data_format(data):
+    totals, opened = 0, 0
+    function, practice, load, compatibility, ui, demand, security = 0, 0, 0, 0, 0, 0, 0
+    level2, level3, level4, level5 = 0, 0, 0, 0
+    type_dict, level_dict = {}, {}
+    name_list, to_list, op_list = [], [], []
+
+    for k, v in data.items():
+        to = v['total']
+        op = v['opened']
+        if v['total'] > 0:
+            name_list.append(k)
+            to_list.append(to)
+            op_list.append(op)
+
+            totals += to
+            opened += op
+
+            v['type'].setdefault('功能', 0)
+            v['type'].setdefault('用户体验', 0)
+            v['type'].setdefault('性能', 0)
+            v['type'].setdefault('兼容', 0)
+            v['type'].setdefault('UI', 0)
+            v['type'].setdefault('需求', 0)
+            v['type'].setdefault('安全性', 0)
+            v['level'].setdefault('严重', 0)
+            v['level'].setdefault('一般', 0)
+            v['level'].setdefault('提示', 0)
+            v['level'].setdefault('建议', 0)
+
+            function += v['type']['功能']
+            practice += v['type']['用户体验']
+            load += v['type']['性能']
+            compatibility += v['type']['兼容']
+            ui += v['type']['UI']
+            demand += v['type']['需求']
+            security += v['type']['安全性']
+            level2 += v['level']['严重']
+            level3 += v['level']['一般']
+            level4 += v['level']['提示']
+            level5 += v['level']['建议']
+
+    type_dict['功能'] = function
+    type_dict['用户体验'] = practice
+    type_dict['性能'] = load
+    type_dict['兼容'] = compatibility
+    type_dict['UI'] = ui
+    type_dict['需求'] = demand
+    type_dict['安全性'] = security
+
+    level_dict['严重'] = level2
+    level_dict['一般'] = level3
+    level_dict['提示'] = level4
+    level_dict['建议'] = level5
+
+    return totals, opened, type_dict, level_dict, name_list, to_list, op_list
+
+
+def dict_sort(name_list, to_list, op_list):
+    dict1 = dict(zip(name_list, to_list))
+    dict2 = dict(zip(name_list, op_list))
+
+    temp = sorted(dict1.items(), key=lambda kv: (kv[1], kv[0]))
+
+    n_list = []
+    t_list = []
+    o_list = []
+
+    for name, count in temp:
+        n_list.append(name)
+        t_list.append(count)
+        t = dict2[name]
+        o_list.append(t)
+
+    return n_list, t_list, o_list
+
+
+def format_dict(target_dict):
+    pie_data = []
+    pie_name = []
+    for k, v in target_dict.items():
+        if v > 0:
+            t_dict = {'value': v, 'name': k}
+            pie_data.append(t_dict)
+            pie_name.append(k)
+
+    return pie_data, pie_name

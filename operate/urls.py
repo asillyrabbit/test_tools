@@ -17,4 +17,6 @@ urlpatterns = [
     path('querysales/', views.querysales, name='querysales'),
     path('modmonth/', views.modmonth, name='modmonth'),
     path('postatus/', views.postatus, name='postatus'),
+    path('newbugs/', views.newbugs, name='newbugs'),
+    path('qmodule/', views.qmodule, name='qmodule'),
 ]

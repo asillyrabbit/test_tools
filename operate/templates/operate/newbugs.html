@@ -1,0 +1,288 @@
+{% extends "config/base.html" %}
+{% load bootstrap4 %}
+{% load static %}
+
+{% block page_header %}
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="{% static 'js/echarts.min.js' %}"></script>
+{% endblock %}
+
+{% block search %}
+    <div class="bugs-form col-xs-12">
+        <form class="form-inline" method="post" action="{% url 'operate:newbugs' %}">
+            {% csrf_token %}
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" name="mname" id="mid" placeholder="请输入模块名称"
+                       required/>
+                <div class="input-group-append">
+                    <button id="load" class="btn btn-success load" type="submit">统计</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <script>
+        $(function () {
+            $("#mid").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '/opt/qmodule/',
+                        dataType: 'jsonp',
+                        data: {
+                            term: request.term
+                        },
+                        success: function (data) {
+                            response(data);
+                        },
+                    });
+                },
+                minLength: 1,
+            })
+        })
+    </script>
+
+{% endblock search %}
+{% block content %}
+    <div class="col-xs-12">
+        <style type="text/css">
+            .t_head, .t_body, th {
+                text-align: center;
+                vertical-align: middle !important;
+            }
+
+            .bar {
+                width: 1000px;
+                height: 300px;
+            }
+
+            .pie1, .pie2 {
+                width: 400px;
+                height: 300px;
+                float: left;
+            }
+        </style>
+        {% if bugs_len > 0 %}
+            <div>
+                <table class="table table-bordered table-sm col-xs-12">
+                    <thead class="thead-light t_head">
+                    <tr>
+                        <th rowspan="2">模块</th>
+                        <th rowspan="2">问题总数</th>
+                        <th rowspan="2">未关闭问题数</th>
+                        <th colspan="7">问题分类</th>
+                        <th colspan="4">问题级别</th>
+                    </tr>
+                    <tr>
+                        <th>功能</th>
+                        <th>用户体验</th>
+                        <th>性能</th>
+                        <th>兼容</th>
+                        <th>UI</th>
+                        <th>需求</th>
+                        <th>安全性</th>
+                        <th>严重</th>
+                        <th>一般</th>
+                        <th>提示</th>
+                        <th>建议</th>
+                    </tr>
+                    </thead>
+                    <tbody class="t_body">
+                    {% for key,value in bugs.items %}
+                        {% if value.total > 0 %}
+                            <tr>
+                                <td>{{ key }}</td>
+                                <td>{{ value.total }}</td>
+                                <td>{{ value.opened }}</td>
+                                <td>{{ value.type.功能|default:"" }}</td>
+                                <td>{{ value.type.用户体验|default:"" }}</td>
+                                <td>{{ value.type.性能|default:"" }}</td>
+                                <td>{{ value.type.兼容|default:"" }}</td>
+                                <td>{{ value.type.UI|default:"" }}</td>
+                                <td>{{ value.type.需求|default:"" }}</td>
+                                <td>{{ value.type.安全性|default:"" }}</td>
+                                <td>{{ value.level.严重|default:"" }}</td>
+                                <td>{{ value.level.一般|default:"" }}</td>
+                                <td>{{ value.level.提示|default:"" }}</td>
+                                <td>{{ value.level.建议|default:"" }}</td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                    <tr class="font-weight-bold">
+                        <td>合计：</td>
+                        <td>{{ totals }}</td>
+                        <td>{{ opened }}</td>
+                        <td>{{ type_dict.功能|default:"" }}</td>
+                        <td>{{ type_dict.用户体验|default:"" }}</td>
+                        <td>{{ type_dict.性能|default:"" }}</td>
+                        <td>{{ type_dict.兼容|default:"" }}</td>
+                        <td>{{ type_dict.UI|default:"" }}</td>
+                        <td>{{ type_dict.需求|default:"" }}</td>
+                        <td>{{ type_dict.安全性|default:"" }}</td>
+                        <td>{{ level_dict.严重|default:"" }}</td>
+                        <td>{{ level_dict.一般|default:"" }}</td>
+                        <td>{{ level_dict.提示|default:"" }}</td>
+                        <td>{{ level_dict.建议|default:"" }}</td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div id="bar" class="bar col-xs-12"></div>
+                <div>
+                    <span id="pie1" class="pie1 col-xs-12"></span>
+                    <span id="pie2" class="pie2 col-xs-12"></span>
+                </div>
+                <script>
+                    var mybar = echarts.init(document.getElementById('bar'));
+                    var bar_data = [{{ name_list|safe }}, {{ to_list|safe }}, {{ op_list|safe }}]
+
+                    var mypie1 = echarts.init(document.getElementById('pie1'));
+                    var mypie2 = echarts.init(document.getElementById('pie2'));
+                    var pie_data = [{{ type_name|safe }}, {{ type_data|safe }}, {{ level_name|safe }}, {{ level_data|safe }}]
+
+                    // 指定图表的配置项和数据
+                    var bar_option = {
+                        title: {
+                            text: "问题燃尽情况"
+                        },
+                        tooltip: {
+                            trigger: "axis"
+                        },
+                        legend: {
+                            data: ["问题总数", "未关闭问题数"]
+                        },
+                        toolbox: {
+                            feature: {
+                                magicType: {
+                                    type: ["line", "bar"],
+                                    show: false
+                                }
+                            }
+                        },
+                        xAxis: [
+                            {
+                                type: "value",
+                                boundaryGap: [0, 0.01]
+                            }
+                        ],
+                        yAxis: [
+                            {
+                                type: "category",
+                                data: bar_data[0]
+                            }
+                        ],
+                        series: [
+                            {
+                                name: "问题总数",
+                                type: "bar",
+                                data: bar_data[1],
+                                barGap: "-100%",
+                                itemStyle: {
+                                    normal: {
+                                        color: "rgb(86, 170, 255)",
+                                        label: {
+                                            position: "insideRight",
+                                            show: true
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                name: "未关闭问题数",
+                                type: "bar",
+                                data: bar_data[2],
+                                itemStyle: {
+                                    normal: {
+                                        color: "rgb(0, 127, 255)",
+                                        label: {
+                                            show: true,
+                                            position: "insideRight",
+                                            formatter: function (params) {
+                                                if (params.value > 0) {
+                                                    return params.value;
+                                                } else {
+                                                    return '';
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    };
+
+                    var mypie1_option = {
+                        title: {
+                            text: "未关闭问题分类占比",
+                            x: "center"
+                        },
+                        legend: {
+                            data: pie_data[0],
+                            orient: "vertical",
+                            y: "top",
+                            x: "left"
+                        },
+                        series: [
+                            {
+                                name: "问题分类",
+                                type: "pie",
+                                radius: "55%",
+                                center: ["50%", "60%"],
+                                itemStyle: {
+                                    normal: {
+                                        label: {
+                                            position: "inside",
+                                            formatter: "{c} ",
+                                            show: true
+                                        }
+                                    }
+                                },
+                                data: pie_data[1]
+                            }
+                        ]
+                    };
+
+                    var mypie2_option = {
+                        title: {
+                            text: "未关闭问题级别占比",
+                            x: "center"
+                        },
+                        legend: {
+                            data: pie_data[2],
+                            orient: "vertical",
+                            y: "top",
+                            x: "left"
+                        },
+                        series: [
+                            {
+                                name: "问题分类",
+                                type: "pie",
+                                radius: "55%",
+                                center: ["50%", "60%"],
+                                itemStyle: {
+                                    normal: {
+                                        label: {
+                                            position: "inside",
+                                            formatter: "{c} ",
+                                            show: true
+                                        }
+                                    }
+                                },
+                                data: pie_data[3]
+                            }
+                        ]
+                    };
+
+                    // 使用刚指定的配置项和数据显示图表。
+                    mybar.setOption(bar_option);
+                    mypie1.setOption(mypie1_option);
+                    mypie2.setOption(mypie2_option);
+                </script>
+            </div>
+        {% elif bugs_len == 0 %}
+            <div class="alert alert-info col-md-6">
+                <strong>没有查询到任何结果，请检查模块名是否正确！</strong>
+            </div>
+        {% endif %}
+    </div>
+{% endblock content %}
+
