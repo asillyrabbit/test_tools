@@ -25,5 +25,5 @@
 ![更新环境](https://github.com/asillyrabbit/temp/blob/main/%E6%9B%B4%E6%96%B0%E7%8E%AF%E5%A2%83.PNG?raw=true)
 
 - __统计日报__：根据自定义报表样式，返回bug统计结果。
-![统计日报](https://github.com/asillyrabbit/temp/blob/main/%E7%BB%9F%E8%AE%A1%E6%97%A5%E6%8A%A5.PNG?raw=true)
+![统计日报](https://github.com/asillyrabbit/temp/blob/main/%E6%97%A5%E6%8A%A5.PNG?raw=true)
 
