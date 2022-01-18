@@ -50,7 +50,8 @@
                                     ident: '{{ com_info.ident }}'
                                 },
                                 beforeSend: function () {
-                                    document.getElementById('{{ com_info.ident }}').innerHTML = '执行中...';
+                                    {#document.getElementById('{{ com_info.ident }}').innerHTML = '执行中...';#}
+                                    document.getElementById('{{ com_info.ident }}').innerHTML = '<div class="spinner-border text-primary"></div>';
                                 },
                                 success: function (response) {
                                     document.getElementById('{{ com_info.ident }}').innerHTML = response.result;
