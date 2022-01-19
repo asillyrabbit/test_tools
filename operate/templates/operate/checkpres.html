@@ -1,0 +1,79 @@
+{% extends "config/base.html" %}
+{% load bootstrap4 %}
+
+
+{% block page_header %}
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+{% endblock %}
+
+{% block search %}
+    <div class="bugs-form col-xs-12">
+        <form class="form-inline" method="post" action="{% url 'operate:checkpres' %}">
+            {% csrf_token %}
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" name="orderno" id="num" placeholder="请输入订单号"
+                       required/>
+                <div class="input-group-append">
+                    <button id="load" class="btn btn-success load" type="submit">检查</button>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock search %}
+{% block content %}
+    <div class="col-xs-12">
+        <style type="text/css">
+            .t_head, .t_body, th {
+                text-align: center;
+                vertical-align: middle !important;
+                {#width: 300px;#}
+            }
+        </style>
+
+        {% if supp_num > 0 %}
+            <div>
+                {% if supp_num > 1 %}
+                    <div style="color: red">
+                        <p>供应商错误！当前处方包含{{ supp_num }}个供应商：{{ supp_str }}<p>
+                    </div>
+                {% endif %}
+                {% if supp_num == 1 %}
+                    <div style="color: royalblue">
+                        <p>请确认供应商是否正确！</p>
+                    </div>
+                {% endif %}
+                <table class="table table-bordered table-sm col-xs-12">
+                    <thead class="thead-light t_head">
+                    <tr>
+                        <th colspan="2">供应商信息</th>
+                        <th colspan="2">药材信息</th>
+                    </tr>
+                    <tr>
+                        <th>ID</th>
+                        <th>名称</th>
+                        <th>ID</th>
+                        <th>名称</th>
+                    </tr>
+                    </thead>
+                    <tbody class="t_body">
+                    {% for pres_info in pres_infos %}
+                        <tr>
+                            <td>{{ pres_info.0 }}</td>
+                            <td>{{ pres_info.1 }}</td>
+                            <td>{{ pres_info.2 }}</td>
+                            <td>{{ pres_info.3 }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% elif supp_num == 0 %}
+            <div class="alert alert-info col-md-6">
+                <strong>没有查询到任何信息，请检查订单号是否正确！</strong>
+            </div>
+        {% endif %}
+    </div>
+{% endblock content %}
+

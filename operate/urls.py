@@ -19,4 +19,5 @@ urlpatterns = [
     path('postatus/', views.postatus, name='postatus'),
     path('newbugs/', views.newbugs, name='newbugs'),
     path('qmodule/', views.qmodule, name='qmodule'),
+    path('checkpres/', views.checkpres, name='checkpres'),
 ]

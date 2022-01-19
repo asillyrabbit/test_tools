@@ -609,3 +609,45 @@ def format_dict(target_dict):
             pie_name.append(k)
 
     return pie_data, pie_name
+
+
+# 2022-01-19新增检查处方药品供应商功能
+def checkpres(requests):
+    if requests.method != 'POST':
+        return render(requests, 'operate/checkpres.html')
+    else:
+        orderno = requests.POST['orderno']
+
+        dbinfo = eval(EnvInfo.objects.get(ident='TestDB').info)
+
+        q_pres = f"select d.id,d.shot_name,a.id,a.name \
+                       from gyy_suplier_medical_t a,gyy_supplier_t d where a.id \
+                       in (select b.s_m_id from gyy_prescription_medical_t b where b.prescripiton_id \
+                       in (select c.relation_id from gyy_order_t c where c.order_no='{orderno}')) \
+                       and a.supplier=d.id;"
+
+        q_supp = f"select d.name from gyy_suplier_medical_t a,gyy_supplier_t d \
+                   where a.id in (select b.s_m_id from gyy_prescription_medical_t b \
+                   where b.prescripiton_id in (select c.relation_id from gyy_order_t c \
+                   where c.order_no='{orderno}')) and a.supplier=d.id group by a.supplier;"
+
+        mydb = MyDB(**dbinfo)
+        con = mydb.connect()
+        cur = con.cursor()
+        cur.execute(q_pres)
+        pres_infos = cur.fetchall()
+        cur.execute(q_supp)
+        supp_infos = cur.fetchall()
+        cur.close()
+
+        supp_num = len(supp_infos)
+        supp_str = ''
+        for supp in supp_infos:
+            supp_str = supp_str + supp[0] + '、'
+
+        supp_str = supp_str.strip('、')
+
+
+        context = {'pres_infos': pres_infos, 'supp_num': supp_num, 'supp_str': supp_str}
+
+        return render(requests, 'operate/checkpres.html', context)
