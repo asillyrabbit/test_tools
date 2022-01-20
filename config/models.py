@@ -18,7 +18,7 @@ class EnvInfo(models.Model):
 class ComInfo(models.Model):
     id = models.AutoField('序号', primary_key=True)
     name = models.CharField('命令名称', max_length=30, unique=True)
-    command = models.CharField('执行命令', max_length=100)
+    command = models.CharField('执行命令', max_length=200)
     ident = models.CharField('唯一标识', max_length=20)
 
     def __str__(self):
