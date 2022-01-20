@@ -183,6 +183,10 @@ def state(requests):
     re_pat = ComInfo.objects.get(ident='re_pat').command
     re_back = ComInfo.objects.get(ident='re_back').command
 
+    stp_doc = ComInfo.objects.get(ident='stp_doc').command
+    stp_pat = ComInfo.objects.get(ident='stp_pat').command
+    stp_back = ComInfo.objects.get(ident='stp_back').command
+
     server_info = eval(EnvInfo.objects.get(ident='TestServer').info)
 
     myssh = MySSH(**server_info)
@@ -193,10 +197,17 @@ def state(requests):
     if ident == 'up_testing':
         results = exe_commd(ident, conn, up_testing)
     if ident == 're_doc':
+        exe_commd(ident, conn, stp_doc)
+        # 暂停3秒，等待所有进程停止
+        time.sleep(3)
         results = exe_commd(ident, conn, re_doc)
     if ident == 're_pat':
+        exe_commd(ident, conn, stp_pat)
+        time.sleep(3)
         results = exe_commd(ident, conn, re_pat)
     if ident == 're_back':
+        exe_commd(ident, conn, stp_back)
+        time.sleep(3)
         results = exe_commd(ident, conn, re_back)
 
     conn.close()
@@ -448,7 +459,8 @@ def exe_commd(ident, conn, commd):
         'fail_msg': ''
     }
 
-    stdin, stdout, stderr = conn.exec_command(commd)
+    # get_pty=True解决stdout中没有数据或有一行没有输出时导致执行卡住的情况
+    stdin, stdout, stderr = conn.exec_command(commd, get_pty=True)
     logs = stdout.read().decode()
     logs = logs.replace('\n', '<br/>').lstrip('b\'').rstrip('\'')
     if len(logs) == 0:
@@ -646,7 +658,6 @@ def checkpres(requests):
             supp_str = supp_str + supp[0] + '、'
 
         supp_str = supp_str.strip('、')
-
 
         context = {'pres_infos': pres_infos, 'supp_num': supp_num, 'supp_str': supp_str}
 
