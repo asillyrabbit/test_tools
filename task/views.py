@@ -13,17 +13,20 @@ def task(request):
 
     st_hours = statistics(re.remote_ip)
 
+    cur_month = str(time.strftime("%Y%m"))
     t_dates = Task.objects.select_related('date').filter(date__state=1).values('date__month').annotate(Count('date'))
 
     dates = []
-    for date in t_dates:
-        month = date['date__month']
-        dates.append(month)
+    if t_dates:
+        for date in t_dates:
+            month = date['date__month']
+            dates.append(month)
+    else:
+        dates.append(cur_month)
 
     status = Status.objects.all()
 
     if request.method != 'POST':
-        cur_month = str(time.strftime("%Y%m"))
         tasks = Task.objects.select_related('date').filter(date__month=cur_month, status='2')
 
         def_sel = {'date': cur_month, 'state': '进行中'}
