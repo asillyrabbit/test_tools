@@ -21,12 +21,15 @@
     <div class="collapse navbar-collapse" id="navbarCollapse">
         <ul class="navbar-nav mr-auto">
             <li class="nav-item">
+                <a class="nav-link" href="{% url 'task:task' %}">任务管理</a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link" href="{% url 'operate:update' %}">更新环境</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'operate:newbugs' %}">统计日报</a>
             </li>
-              <li class="nav-item">
+            <li class="nav-item">
                 <a class="nav-link" href="{% url 'operate:checkpres' %}">检查处方</a>
             </li>
             <li class="nav-item">
