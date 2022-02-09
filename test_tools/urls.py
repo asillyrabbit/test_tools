@@ -19,11 +19,11 @@ from django.conf.urls import url
 from django.views import static
 from django.conf import settings
 
-
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('config.urls')),
     path('opt/', include('operate.urls')),
+    path('task/', include('task.urls')),
 
     # # 设置项目上线的静态资源路径
     url(r'^static/(?P<path>.*)$', static.serve,

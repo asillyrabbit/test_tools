@@ -1,5 +1,6 @@
 import pymysql
 import paramiko
+from task.models import Record
 
 
 class MyDB:
@@ -36,3 +37,21 @@ class GetFile:
         sftp = paramiko.SFTPClient.from_transport(trans)
 
         return sftp
+
+
+class OptRecord:
+    def __init__(self, request):
+        self.request = request
+        try:
+            self.remote_ip = self.request.META['REMOTE_ADDR']
+        except:
+            self.remote_ip = 'zhangsan'
+
+    def opt_record(self):
+        re_ip = Record.objects.filter(remoteIp=self.remote_ip)
+
+        if re_ip:
+            re_ip[0].count += 1
+            re_ip[0].save()
+        else:
+            Record.objects.create(remoteIp=self.remote_ip, count=1)

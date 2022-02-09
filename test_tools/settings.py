@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     # 我的应用程序
     'config',
     'operate',
+    'task',
 
     # 第三方应用程序
     'bootstrap4',
@@ -128,4 +129,3 @@ STATIC_ROOT = 'static'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "/static/"),
 ]
-

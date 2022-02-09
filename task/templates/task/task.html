@@ -1,0 +1,148 @@
+{% extends 'config/base.html' %}
+{% load bootstrap4 %}
+{% load static %}
+
+{% block page_header %}
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/popper.js/1.15.0/umd/popper.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="{% static 'js/sweetalert-dev.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'css/sweetalert.css' %}">
+{% endblock %}
+
+
+{% block content %}
+    <div class="col-xs-12">
+        <style type="text/css">
+            .opt-val, .t-head, .t-body, th, td {
+                text-align: center;
+                vertical-align: middle !important;
+                font-size: 14px;
+            }
+
+            tr, td {
+                width: 100px;
+            }
+
+            .t-type, .t-hours, .t-state, .task-id {
+                width: 80px;
+            }
+
+            .t-name {
+                text-align: left;
+                width: 290px;
+            }
+
+            .opt-btn {
+                box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 1px 2px 0 rgba(0, 0, 0, 0.19);
+                font-size: 15px;
+            }
+
+            .tip-msg {
+                font-size: 14px;
+            }
+        </style>
+        <div class="col-xs-12">
+            <form class="form-inline" method="post" action="{% url 'task:task' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="month">日期：</label>
+                    <select class="form-control" id="month" name="month">
+                        {% for date in dates %}
+                            {% if date == def_sel.date %}
+                                <option value="{{ date }}" selected="selected">{{ date }}</option>
+                            {% else %}
+                                <option value="{{ date }}">{{ date }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                    <label for="state" style="margin-left: 10px">状态：</label>
+                    <select class="form-control" id="state" name="state">
+                        {% for state in status %}
+                            {% if state.name == def_sel.state %}
+                                <option class="opt-val" value="{{ state.name }}"
+                                        selected="selected">{{ state.name }}</option>
+                            {% else %}
+                                <option class="opt-val" value="{{ state.name }}">{{ state.name }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                    <input style="margin-left: 5px" class="form-control btn btn-primary" id="query" type="submit"
+                           value="查询"/>
+                </div>
+            </form>
+        </div>
+        <div class="col-xs-12" style="margin-top: 13px">
+            <div class="text-info" style="margin-bottom: 2px;font-size: small;">
+                提醒：本月你已完成 <span style="font-size: 16px;">{{ st_hours.tester_hours }}</span>
+                h，距离工作饱和还差 <span style="font-size: 16px;">{{ st_hours.diff_hours }}</span> h，
+                请继续加油！
+            </div>
+            <table class="table table-bordered table-sm">
+                <thead class="t-head thead-light">
+                <tr>
+                    <th>任务类型</th>
+                    <th>需求编号</th>
+                    <th>描述</th>
+                    <th>工时（H）</th>
+                    <th>测试负责人</th>
+                    <th>状态</th>
+                    <th>开始时间</th>
+                    <th>截止时间</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody class="t-body">
+                {% for task in tasks %}
+                    <tr>
+                        <td class="t-type">{{ task.type }}</td>
+                        <td>{{ task.item }}</td>
+                        <td class="t-name">{{ task.name }}</td>
+                        <td class="t-hours">{{ task.hours }}</td>
+                        <td id="tester{{ task.id }}">{{ task.tester }}</td>
+                        <td class="t-state">{{ task.status }}</td>
+                        <td>{{ task.start }}</td>
+                        <td>{{ task.end }}</td>
+                        <td class="task-id" id="{{ task.id }}">
+                            {% if def_sel.state == "待认领" %}
+                                <button type="button" class="{{ task.id }} opt-btn btn btn-primary">认领</button>
+                            {% elif def_sel.state == "进行中" %}
+                                <button type="button" class="{{ task.id }} opt-btn btn btn-primary">完成</button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <script>
+                        $('.{{ task.id }}').click(function () {
+                            $.ajax({
+                                url: '/task/update/',
+                                type: 'get',
+                                dataType: 'json',
+                                data: {
+                                    id: '{{ task.id }}',
+                                },
+                                success: function (response) {
+                                    if (response.tester === "路人") {
+                                        swal('仅支持测试人员操作！');
+                                        document.getElementById('{{ task.id }}').innerHTML = response.button;
+                                    } else {
+                                        document.getElementById('{{ task.id }}').innerHTML = response.button;
+                                        document.getElementById('tester{{ task.id }}').innerHTML = response.tester;
+                                    }
+                                }
+                            })
+                        })
+                    </script>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% if not tasks %}
+                {% if def_sel.state == "待认领" %}
+                    <div class="tip-msg text-muted">稍等，任务马上就来！</div>
+                {% else %}
+                    <div class="tip-msg text-muted">一大波任务正在等着你去认领！</div>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
