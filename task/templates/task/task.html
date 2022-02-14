@@ -101,7 +101,12 @@
                         <td class="t-name">{{ task.name }}</td>
                         <td class="t-hours">{{ task.hours }}</td>
                         <td id="tester{{ task.id }}">{{ task.tester }}</td>
-                        <td class="t-state">{{ task.status }}</td>
+                        {% if task.delay == 0 %}
+                            <td class="t-state">{{ task.status }} <span
+                                    class="badge badge-warning">已延期</span></td>
+                        {% else %}
+                            <td class="t-state">{{ task.status }}</td>
+                        {% endif %}
                         <td>{{ task.start }}</td>
                         <td>{{ task.end }}</td>
                         <td class="task-id" id="{{ task.id }}">

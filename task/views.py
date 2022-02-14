@@ -15,6 +15,8 @@ def task(request):
 
     cur_month = str(time.strftime("%Y%m"))
     t_dates = Task.objects.select_related('date').filter(date__state=1).values('date__month').annotate(Count('date'))
+    cur_day = str(time.strftime("%Y-%m-%d"))
+    Task.objects.filter(end__lt=cur_day).update(delay=0)
 
     dates = []
     if t_dates:
@@ -27,7 +29,8 @@ def task(request):
     status = Status.objects.all()
 
     if request.method != 'POST':
-        tasks = Task.objects.select_related('date').filter(date__month=cur_month, status='2')
+        state_id = Status.objects.get(name='进行中')
+        tasks = Task.objects.select_related('date').filter(date__month=cur_month, status=state_id).order_by('end')
 
         def_sel = {'date': cur_month, 'state': '进行中'}
         context = {'tasks': tasks, 'dates': dates, 'def_sel': def_sel, 'status': status, 'st_hours': st_hours}
@@ -36,7 +39,10 @@ def task(request):
         q_month = request.POST['month']
         q_state = request.POST['state']
         state_id = Status.objects.get(name=q_state)
-        tasks = Task.objects.select_related('date').filter(date__month=q_month, status=state_id)
+        if q_state == '已完成':
+            tasks = Task.objects.select_related('date').filter(date__month=q_month, status=state_id).order_by('-end')
+        else:
+            tasks = Task.objects.select_related('date').filter(date__month=q_month, status=state_id).order_by('end')
         def_sel = {'date': q_month, 'state': q_state}
         context = {'tasks': tasks, 'dates': dates, 'def_sel': def_sel, 'status': status, 'st_hours': st_hours}
         return render(request, 'task/task.html', context)
@@ -76,10 +82,14 @@ def statistics(remote_ip):
     from decimal import Decimal
     tester = User.objects.filter(bindIp=remote_ip)
 
+    cur_month = str(time.strftime("%Y%m"))
+    hours = Hours.objects.get(month=cur_month)
+
     if tester:
         tester = tester[0].name
         state = Status.objects.get(name='已完成')
-        hours_sum = Task.objects.values('tester').annotate(Sum('hours')).filter(tester=tester, status=state.id)
+        hours_sum = Task.objects.values('tester').annotate(Sum('hours')).filter(tester=tester, status=state.id,
+                                                                                date=hours.id)
         if hours_sum:
             tester_hours = hours_sum[0]['hours__sum']
         else:
@@ -87,10 +97,8 @@ def statistics(remote_ip):
     else:
         tester_hours = 0
 
-    cur_month = str(time.strftime("%Y%m"))
-    h = Hours.objects.get(month=cur_month)
     # 当月工时 = 工作日 * 日工时 - 2天（上线、会议缓冲时间）
-    month_hours = (Decimal(h.workDay) - Decimal(2)) * Decimal(h.dayHours)
+    month_hours = (Decimal(hours.workDay) - Decimal(2)) * Decimal(hours.dayHours)
     diff_hours = month_hours - Decimal(tester_hours)
 
     if diff_hours < 0:

@@ -27,7 +27,8 @@ class ConfigsAdmin(admin.ModelAdmin):
 
 @admin.register(Task)
 class ConfigsAdmin(admin.ModelAdmin):
-    list_display = ['id', 'date', 'type', 'item', 'name', 'hours', 'tester', 'status', 'start', 'end']
+    list_display = ['id', 'date', 'type', 'item', 'name', 'hours', 'tester', 'status', 'delay', 'start', 'end',
+                    'updated']
     search_fields = ['name']
     ordering = ['id']
 
