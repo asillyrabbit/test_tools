@@ -1,7 +1,7 @@
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from task.models import Task, Status, User, Hours
-from django.db.models import Sum, Count
+from django.db.models import Sum, Count, Q
 from test_tools.common import OptRecord
 import time
 
@@ -16,7 +16,7 @@ def task(request):
     cur_month = str(time.strftime("%Y%m"))
     t_dates = Task.objects.select_related('date').filter(date__state=1).values('date__month').annotate(Count('date'))
     cur_day = str(time.strftime("%Y-%m-%d"))
-    Task.objects.filter(end__lt=cur_day).update(delay=0)
+    Task.objects.select_related('status').filter(~Q(status__name='已完成'), end__lt=cur_day).update(delay=0)
 
     dates = []
     if t_dates:
@@ -40,7 +40,7 @@ def task(request):
         q_state = request.POST['state']
         state_id = Status.objects.get(name=q_state)
         if q_state == '已完成':
-            tasks = Task.objects.select_related('date').filter(date__month=q_month, status=state_id).order_by('-end')
+            tasks = Task.objects.select_related('date').filter(date__month=q_month, status=state_id).order_by('-updated')
         else:
             tasks = Task.objects.select_related('date').filter(date__month=q_month, status=state_id).order_by('end')
         def_sel = {'date': q_month, 'state': q_state}
