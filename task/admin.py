@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Type, User, Status, Task, Hours, Record
+from .models import Type, User, Status, Task, Hours, Record, Percent
 
 
 # Register your models here.
@@ -44,4 +44,11 @@ class ConfigsAdmin(admin.ModelAdmin):
 class ConfigsAdmin(admin.ModelAdmin):
     list_display = ['id', 'remoteIp', 'count', 'created', 'updated']
     search_fields = ['pcName']
+    ordering = ['id']
+
+
+@admin.register(Percent)
+class ConfigsAdmin(admin.ModelAdmin):
+    list_display = ['id', 'name', 'percent']
+    search_fields = ['name']
     ordering = ['id']

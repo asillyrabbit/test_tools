@@ -89,3 +89,17 @@ class Record(models.Model):
     class Meta:
         verbose_name = '操作记录'
         verbose_name_plural = '操作记录'
+
+
+class Percent(models.Model):
+    id = models.AutoField('ID', primary_key=True)
+    name = models.CharField('描述', max_length=15)
+    ident = models.CharField('标识', max_length=10)
+    percent = models.FloatField('百分比', max_length=3)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = '百分比'
+        verbose_name_plural = '百分比'

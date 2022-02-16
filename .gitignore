@@ -2,4 +2,6 @@ __pycache__/
 .idea/
 tt_env/
 db.sqlite3
+0005_percent.py
+0006_percent_ident.py
 

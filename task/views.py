@@ -1,6 +1,6 @@
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
-from task.models import Task, Status, User, Hours
+from task.models import Task, Status, User, Hours, Percent
 from django.db.models import Sum, Count, Q
 from test_tools.common import OptRecord
 import time
@@ -40,7 +40,8 @@ def task(request):
         q_state = request.POST['state']
         state_id = Status.objects.get(name=q_state)
         if q_state == '已完成':
-            tasks = Task.objects.select_related('date').filter(date__month=q_month, status=state_id).order_by('-updated')
+            tasks = Task.objects.select_related('date').filter(date__month=q_month, status=state_id).order_by(
+                '-updated')
         else:
             tasks = Task.objects.select_related('date').filter(date__month=q_month, status=state_id).order_by('end')
         def_sel = {'date': q_month, 'state': q_state}
@@ -90,7 +91,17 @@ def statistics(remote_ip):
         state = Status.objects.get(name='已完成')
         hours_sum = Task.objects.values('tester').annotate(Sum('hours')).filter(tester=tester, status=state.id,
                                                                                 date=hours.id)
-        if hours_sum:
+        delay_sum = Task.objects.values('tester').annotate(Sum('hours')).filter(tester=tester, status=state.id,
+                                                                                date=hours.id, delay=0)
+
+        if delay_sum:
+            pt = Percent.objects.get(ident='delay')
+            percent = int(100 * pt.percent)
+            d_time = delay_sum[0]['hours__sum']
+            d_time = (Decimal(d_time) * (100 - percent)) / 100
+            tester_hours = hours_sum[0]['hours__sum']
+            tester_hours = Decimal(tester_hours) - d_time
+        elif hours_sum:
             tester_hours = hours_sum[0]['hours__sum']
         else:
             tester_hours = 0

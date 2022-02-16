@@ -93,8 +93,8 @@
                         <th>完成时间</th>
                     {% else %}
                         <th>截止时间</th>
+                        <th>操作</th>
                     {% endif %}
-                    <th>操作</th>
                 </tr>
                 </thead>
                 <tbody class="t-body">
@@ -116,14 +116,14 @@
                             <td>{{ task.updated }}</td>
                         {% else %}
                             <td>{{ task.end }}</td>
+                            <td class="task-id" id="{{ task.id }}">
+                                {% if def_sel.state == "待认领" %}
+                                    <button type="button" class="{{ task.id }} opt-btn btn btn-primary">认领</button>
+                                {% elif def_sel.state == "进行中" %}
+                                    <button type="button" class="{{ task.id }} opt-btn btn btn-primary">完成</button>
+                                {% endif %}
+                            </td>
                         {% endif %}
-                        <td class="task-id" id="{{ task.id }}">
-                            {% if def_sel.state == "待认领" %}
-                                <button type="button" class="{{ task.id }} opt-btn btn btn-primary">认领</button>
-                            {% elif def_sel.state == "进行中" %}
-                                <button type="button" class="{{ task.id }} opt-btn btn btn-primary">完成</button>
-                            {% endif %}
-                        </td>
                     </tr>
                     <script>
                         $('.{{ task.id }}').click(function () {
