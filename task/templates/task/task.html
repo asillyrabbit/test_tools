@@ -1,6 +1,7 @@
 {% extends 'config/base.html' %}
 {% load bootstrap4 %}
 {% load static %}
+{% load my_tags %}
 
 {% block page_header %}
     <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
@@ -15,7 +16,7 @@
 {% block content %}
     <div class="col-xs-12">
         <style type="text/css">
-            .opt-val, .t-head, .t-body, th, td {
+            .opt-val, .t-head, .t-body, th, td, pre {
                 text-align: center;
                 vertical-align: middle !important;
                 font-size: 14px;
@@ -104,7 +105,9 @@
                         <td>{{ task.item }}</td>
                         <td class="t-name">{{ task.name }}</td>
                         <td class="t-hours">{{ task.hours }}</td>
-                        <td id="tester{{ task.id }}">{{ task.tester }}</td>
+                        {% autoescape off %}
+                            <td id="tester{{ task.id }}">{{ task.tester|format_name }}</td>
+                        {% endautoescape %}
                         {% if task.delay == 0 %}
                             <td class="t-state">{{ task.status }} <span
                                     class="badge badge-warning">已延期</span></td>

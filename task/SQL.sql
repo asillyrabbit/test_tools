@@ -19,3 +19,9 @@ INSERT INTO task_type (id, name) VALUES (9, '间隙期');
 INSERT INTO task_hours (id, month, workDay, dayHours, state) VALUES (1, '202201', 22.0, 7.0, '1');
 INSERT INTO task_hours (id, month, workDay, dayHours, state) VALUES (2, '202202', 16.0, 7.0, '1');
 INSERT INTO task_hours (id, month, workDay, dayHours, state) VALUES (3, '202203', 23.0, 7.0, '1');
+
+
+-- 表：task_percent
+INSERT INTO task_percent (id, name, percent, ident) VALUES (1, '任务延迟折扣', 0.9, 'delay');
+INSERT INTO task_percent (id, name, percent, ident) VALUES (2, '工作量饱和度下限', 0.85, 'sat_min');
+INSERT INTO task_percent (id, name, percent, ident) VALUES (3, '工作量饱和度上限', 0.95, 'sat_max');
