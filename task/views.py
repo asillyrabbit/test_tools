@@ -89,10 +89,10 @@ def statistics(remote_ip):
     if tester:
         tester = tester[0].name
         state = Status.objects.get(name='已完成')
-        hours_sum = Task.objects.values('tester').annotate(Sum('hours')).filter(tester=tester, status=state.id,
-                                                                                date=hours.id)
-        delay_sum = Task.objects.values('tester').annotate(Sum('hours')).filter(tester=tester, status=state.id,
-                                                                                date=hours.id, delay=0)
+        hours_sum = Task.objects.values('date').annotate(Sum('hours')).filter(tester__icontains=tester, status=state.id,
+                                                                              date=hours.id)
+        delay_sum = Task.objects.values('date').annotate(Sum('hours')).filter(tester__icontains=tester, status=state.id,
+                                                                              date=hours.id, delay=0)
 
         if delay_sum:
             pt = Percent.objects.get(ident='delay')
@@ -109,7 +109,8 @@ def statistics(remote_ip):
         tester_hours = 0
 
     # 当月工时 = 工作日 * 日工时 - 2天（上线、会议缓冲时间）
-    month_hours = (Decimal(hours.workDay) - Decimal(2)) * Decimal(hours.dayHours)
+    # month_hours = (Decimal(hours.workDay) - Decimal(2)) * Decimal(hours.dayHours)
+    month_hours = Decimal(hours.workDay) * Decimal(hours.dayHours)
     diff_hours = month_hours - Decimal(tester_hours)
 
     if diff_hours < 0:
