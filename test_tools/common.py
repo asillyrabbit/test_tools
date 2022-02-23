@@ -44,14 +44,16 @@ class OptRecord:
         self.request = request
         try:
             self.remote_ip = self.request.META['REMOTE_ADDR']
+            self.path = self.request.path
         except:
             self.remote_ip = 'zhangsan'
+            self.path = '/'
 
     def opt_record(self):
-        re_ip = Record.objects.filter(remoteIp=self.remote_ip)
+        re_ip = Record.objects.filter(remoteIp=self.remote_ip, path=self.path)
 
         if re_ip:
             re_ip[0].count += 1
             re_ip[0].save()
         else:
-            Record.objects.create(remoteIp=self.remote_ip, count=1)
+            Record.objects.create(remoteIp=self.remote_ip, count=1, path=self.path)

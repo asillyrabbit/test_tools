@@ -20,8 +20,13 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarCollapse">
         <ul class="navbar-nav mr-auto">
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'task:task' %}">任务管理</a>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-target="#navbarDropdown"
+                   data-toggle="dropdown">任务管理</a>
+                <div id="navbarDropdown" class="dropdown-menu">
+                    <a class="dropdown-item" href="{% url 'task:task' %}">任务管理</a>
+                    <a class="dropdown-item" href="{% url 'task:score' %}">积分排行</a>
+                </div>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'operate:update' %}">更新环境</a>

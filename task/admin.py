@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Type, User, Status, Task, Hours, Record, Percent
+from .models import Type, User, Status, Task, Hours, Record, Percent, Score
 
 
 # Register your models here.
@@ -30,7 +30,7 @@ class ConfigsAdmin(admin.ModelAdmin):
     list_display = ['id', 'date', 'type', 'item', 'name', 'hours', 'tester', 'status', 'delay', 'start', 'end',
                     'updated']
     search_fields = ['name']
-    ordering = ['id']
+    ordering = ['-id']
 
 
 @admin.register(Hours)
@@ -42,13 +42,20 @@ class ConfigsAdmin(admin.ModelAdmin):
 
 @admin.register(Record)
 class ConfigsAdmin(admin.ModelAdmin):
-    list_display = ['id', 'remoteIp', 'count', 'created', 'updated']
+    list_display = ['id', 'remoteIp', 'path', 'count', 'created', 'updated']
     search_fields = ['pcName']
     ordering = ['id']
 
 
 @admin.register(Percent)
 class ConfigsAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'percent']
+    list_display = ['id', 'name', 'percent', 'score']
     search_fields = ['name']
+    ordering = ['id']
+
+
+@admin.register(Score)
+class ConfigsAdmin(admin.ModelAdmin):
+    list_display = ['id', 'month', 'tester', 'score', 'desc']
+    search_fields = ['tester']
     ordering = ['id']

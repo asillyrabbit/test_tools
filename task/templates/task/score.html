@@ -1,0 +1,92 @@
+{% extends 'config/base.html' %}
+{% load bootstrap4 %}
+{% load static %}
+
+{% block page_header %}
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'js/popper.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    <div>
+        <style type="text/css">
+            .t-head, .t-body, th, td {
+                text-align: center;
+                vertical-align: middle !important;
+            }
+
+            .desc {
+                text-align: left;
+            }
+        </style>
+    </div>
+    <div class="col-xs-12">
+        <form class="form-inline" method="post" action="{% url 'task:score' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="month">日期：</label>
+                <select class="form-control" id="month" name="month">
+                    {% for date in dates %}
+                        {% if date == cur_month %}
+                            <option value="{{ date }}" selected="selected">{{ date }}</option>
+                        {% else %}
+                            <option value="{{ date }}">{{ date }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+                <input style="margin-left: 5px" class="form-control btn btn-primary" id="query" type="submit"
+                       value="查询"/>
+            </div>
+        </form>
+    </div>
+    <div class="col-xs-12" style="margin-top: 13px;width: 800px">
+        <div class="text-secondary">工时排行榜：</div>
+        <table class="table table-bordered">
+            <thead class="t-head thead-light">
+            <tr>
+                <th>姓名</th>
+                <th>分值</th>
+                <th class="desc">说明</th>
+            </tr>
+            </thead>
+            <tbody class="t-body">
+            {% for score in sc %}
+                {% if score.type == 'H' %}
+                    <tr>
+                        <td>{{ score.tester }}</td>
+                        <td>{{ score.score }}</td>
+                        <td class="desc">
+                            {{ score.desc }}
+                        </td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+            </tbody>
+        </table>
+        <div class="text-secondary">BUG排行榜：</div>
+        <table class="table table-bordered">
+            <thead class="t-head thead-light">
+            <tr>
+                <th>姓名</th>
+                <th>分值</th>
+                <th class="desc">说明</th>
+            </tr>
+            </thead>
+            <tbody class="t-body">
+            {% for score in sc %}
+                {% if score.type == 'B' %}
+                    <tr>
+                        <td>{{ score.tester }}</td>
+                        <td>{{ score.score }}</td>
+                        <td class="desc">
+                            {{ score.desc }}
+                        </td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

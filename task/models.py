@@ -32,6 +32,7 @@ class Hours(models.Model):
 class User(models.Model):
     id = models.AutoField('ID', primary_key=True)
     name = models.CharField('名字', max_length=10, unique=True)
+    pinyin = models.CharField('拼音名', max_length=20)
     bindIp = models.CharField('绑定IP', max_length=30)
 
     def __str__(self):
@@ -80,6 +81,7 @@ class Record(models.Model):
     id = models.AutoField('ID', primary_key=True)
     remoteIp = models.CharField('访问IP', max_length=30)
     count = models.IntegerField('访问次数', default=0)
+    path = models.CharField('访问地址', max_length=30)
     created = models.DateTimeField('创建时间', auto_now_add=True)
     updated = models.DateTimeField('更新时间', auto_now=True)
 
@@ -96,6 +98,7 @@ class Percent(models.Model):
     name = models.CharField('描述', max_length=15)
     ident = models.CharField('标识', max_length=10)
     percent = models.FloatField('百分比', max_length=3)
+    score = models.IntegerField('分数', default=0)
 
     def __str__(self):
         return self.name
@@ -103,3 +106,19 @@ class Percent(models.Model):
     class Meta:
         verbose_name = '百分比'
         verbose_name_plural = '百分比'
+
+
+class Score(models.Model):
+    id = models.AutoField('ID', primary_key=True)
+    type = models.CharField('类型', choices=(('H', '工时'), ('B', 'BUG')), default='H', max_length=5)
+    month = models.ForeignKey(Hours, on_delete=models.CASCADE, verbose_name='月份')
+    tester = models.CharField('姓名', max_length=5)
+    score = models.IntegerField('分数', default=0)
+    desc = models.CharField('描述', max_length=50, blank=True)
+
+    def __str__(self):
+        return self.tester
+
+    class Meta:
+        verbose_name = '个人积分'
+        verbose_name_plural = '个人积分'

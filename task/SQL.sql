@@ -22,6 +22,5 @@ INSERT INTO task_hours (id, month, workDay, dayHours, state) VALUES (3, '202203'
 
 
 -- 表：task_percent
-INSERT INTO task_percent (id, name, percent, ident) VALUES (1, '任务延迟折扣', 0.9, 'delay');
-INSERT INTO task_percent (id, name, percent, ident) VALUES (2, '工作量饱和度下限', 0.85, 'sat_min');
-INSERT INTO task_percent (id, name, percent, ident) VALUES (3, '工作量饱和度上限', 0.95, 'sat_max');
+INSERT INTO task_percent (id, name, percent, ident, score) VALUES (1, '任务延迟折扣', 0.9, 'delay', 0);
+INSERT INTO task_percent (id, name, percent, ident, score) VALUES (2, '工作量饱和度阈值', 0.95, 'threshold', 30);
