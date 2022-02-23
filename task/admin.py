@@ -13,7 +13,7 @@ class ConfigsAdmin(admin.ModelAdmin):
 
 @admin.register(User)
 class ConfigsAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'bindIp']
+    list_display = ['id', 'pinyin', 'name', 'bindIp']
     search_fields = ['name']
     ordering = ['id']
 
@@ -49,13 +49,13 @@ class ConfigsAdmin(admin.ModelAdmin):
 
 @admin.register(Percent)
 class ConfigsAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'percent', 'score']
+    list_display = ['id', 'ident', 'name', 'percent', 'score']
     search_fields = ['name']
     ordering = ['id']
 
 
 @admin.register(Score)
 class ConfigsAdmin(admin.ModelAdmin):
-    list_display = ['id', 'month', 'tester', 'score', 'desc']
+    list_display = ['id', 'type', 'month', 'tester', 'score', 'desc']
     search_fields = ['tester']
     ordering = ['id']
