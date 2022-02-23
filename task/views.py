@@ -251,7 +251,7 @@ def statistics(tester, hours):
         tester_hours = 0
 
     month_hours = Decimal(hours.workDay) * Decimal(hours.dayHours)
-    tester_hours = Decimal(tester_hours) * 100
+    tester_hours = Decimal(tester_hours)
 
     rate = (tester_hours * 100) / (month_hours * 100)
     rate = round(rate, 2)
