@@ -77,6 +77,9 @@ def update(requests):
 
 # 积分统计
 def score(request):
+    re = OptRecord(request)
+    re.opt_record()
+
     up_all_score()
     t_dates = Score.objects.select_related('month').filter(month__state=1).values('month__month').annotate(
         Count('month'))
