@@ -1,5 +1,6 @@
 import pymysql
 import paramiko
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from task.models import Record
 
 
@@ -57,3 +58,15 @@ class OptRecord:
             re_ip[0].save()
         else:
             Record.objects.create(remoteIp=self.remote_ip, count=1, path=self.path)
+
+
+def page_infos(data, count, page):
+    paginator = Paginator(data, count)
+    try:
+        info = paginator.page(page)
+    except PageNotAnInteger:
+        info = paginator.page(1)
+    except EmptyPage:
+        info = paginator.page(paginator.num_pages)
+
+    return info

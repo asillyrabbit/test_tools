@@ -1,10 +1,9 @@
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
-
 from config.models import EnvInfo, ComInfo
 from task.models import Task, Status, User, Hours, Percent, Score
 from django.db.models import Sum, Count, Q
-from test_tools.common import OptRecord, MySSH
+from test_tools.common import OptRecord, MySSH, page_infos
 from decimal import Decimal
 import time
 
@@ -27,22 +26,47 @@ def task(request):
     if request.method != 'POST':
         state_id = Status.objects.get(name='进行中')
         tasks = Task.objects.select_related('date').filter(date__month=cur_month, status=state_id).order_by('end')
-
         def_sel = {'date': cur_month, 'state': '进行中'}
-        context = {'tasks': tasks, 'dates': dates, 'def_sel': def_sel, 'status': status, 'f_hours': f_hours}
-        return render(request, 'task/task.html', context)
     else:
         q_month = request.POST['month']
         q_state = request.POST['state']
-        state_id = Status.objects.get(name=q_state)
-        if q_state == '已完成':
-            tasks = Task.objects.select_related('date').filter(date__month=q_month, status=state_id).order_by(
-                '-updated')
-        else:
-            tasks = Task.objects.select_related('date').filter(date__month=q_month, status=state_id).order_by('end')
+        tasks = get_tasks(q_state, q_month)
+
         def_sel = {'date': q_month, 'state': q_state}
-        context = {'tasks': tasks, 'dates': dates, 'def_sel': def_sel, 'status': status, 'f_hours': f_hours}
-        return render(request, 'task/task.html', context)
+
+    page_info = page_infos(tasks, 10, 1)
+
+    context = {'page_info': page_info, 'dates': dates, 'def_sel': def_sel, 'status': status, 'f_hours': f_hours}
+    return render(request, 'task/task.html', context)
+
+
+def page(request, month, state, page_num):
+    re = OptRecord(request)
+    re.opt_record()
+
+    f_hours = finish_hours(re.remote_ip)
+
+    t_dates = Task.objects.select_related('date').filter(date__state=1).values('date__month').annotate(Count('date'))
+    dates = month_list('date', t_dates)
+    status = Status.objects.all()
+
+    tasks = get_tasks(state, month)
+
+    page_info = page_infos(tasks, 10, page_num)
+
+    def_sel = {'date': month, 'state': state}
+
+    context = {'page_info': page_info, 'dates': dates, 'def_sel': def_sel, 'status': status, 'f_hours': f_hours}
+    return render(request, 'task/page.html', context)
+
+
+def get_tasks(state, month):
+    state_id = Status.objects.get(name=state)
+    if state == '已完成':
+        tasks = Task.objects.select_related('date').filter(date__month=month, status=state_id).order_by('-updated')
+    else:
+        tasks = Task.objects.select_related('date').filter(date__month=month, status=state_id).order_by('end')
+    return tasks
 
 
 def update(requests):
@@ -204,6 +228,7 @@ def st_bugs():
     names = eval(names)
 
     return names
+
 
 # 公共方法
 def finish_hours(remote_ip):

@@ -1,6 +1,5 @@
 {% extends 'config/base.html' %}
 {% load bootstrap4 %}
-{% load static %}
 {% load my_tags %}
 
 {% block page_header %}
@@ -8,14 +7,12 @@
     <script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
     <script src="https://cdn.staticfile.org/popper.js/1.15.0/umd/popper.min.js"></script>
     <script src="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
-    <script src="{% static 'js/sweetalert-dev.js' %}"></script>
-    <link rel="stylesheet" href="{% static 'css/sweetalert.css' %}">
 {% endblock %}
 
 {% block content %}
     <div class="col-xs-12">
         <style type="text/css">
-            .opt-val, .t-head, .t-body, th, td, pre {
+            .opt-val, .t-head, .t-body, th, td {
                 text-align: center;
                 vertical-align: middle !important;
                 font-size: 14px;
@@ -25,7 +22,7 @@
                 width: 100px;
             }
 
-            .t-type, .t-hours, .t-state, .task-id {
+            .t-type, .t-hours, .t-state {
                 width: 80px;
             }
 
@@ -34,14 +31,6 @@
                 width: 290px;
             }
 
-            .opt-btn {
-                box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 1px 2px 0 rgba(0, 0, 0, 0.19);
-                font-size: 15px;
-            }
-
-            .tip-msg {
-                font-size: 14px;
-            }
         </style>
         <div class="col-xs-12">
             <form class="form-inline" method="post" action="{% url 'task:task' %}">
@@ -89,12 +78,7 @@
                     <th>测试负责人</th>
                     <th>状态</th>
                     <th>开始时间</th>
-                    {% if def_sel.state == "已完成" %}
-                        <th>完成时间</th>
-                    {% else %}
-                        <th>截止时间</th>
-                        <th>操作</th>
-                    {% endif %}
+                    <th>完成时间</th>
                 </tr>
                 </thead>
                 <tbody class="t-body">
@@ -114,87 +98,44 @@
                             <td class="t-state">{{ task.status }}</td>
                         {% endif %}
                         <td>{{ task.start }}</td>
-                        {% if def_sel.state == "已完成" %}
-                            <td>{{ task.updated }}</td>
-                        {% else %}
-                            <td>{{ task.end }}</td>
-                            <td class="task-id" id="{{ task.id }}">
-                                {% if def_sel.state == "待认领" %}
-                                    <button type="button" class="{{ task.id }} opt-btn btn btn-primary">认领</button>
-                                {% elif def_sel.state == "进行中" %}
-                                    <button type="button" class="{{ task.id }} opt-btn btn btn-primary">完成</button>
-                                {% endif %}
-                            </td>
-                        {% endif %}
+                        <td>{{ task.updated }}</td>
                     </tr>
-                    <script>
-                        $('.{{ task.id }}').click(function () {
-                            $.ajax({
-                                url: '/task/update/',
-                                type: 'get',
-                                dataType: 'json',
-                                data: {
-                                    id: '{{ task.id }}',
-                                },
-                                success: function (response) {
-                                    if (response.tester === "路人") {
-                                        swal('仅支持测试人员操作！');
-                                        document.getElementById('{{ task.id }}').innerHTML = response.button;
-                                    } else {
-                                        document.getElementById('{{ task.id }}').innerHTML = response.button;
-                                        document.getElementById('tester{{ task.id }}').innerHTML = response.tester;
-                                    }
-                                }
-                            })
-                        })
-                    </script>
                 {% endfor %}
                 </tbody>
             </table>
-            <div>
-                {% if not page_info %}
-                    {% if def_sel.state == "待认领" %}
-                        <div class="tip-msg text-muted">稍等，任务马上就来！</div>
-                    {% else %}
-                        <div class="tip-msg text-muted">一大波任务正在等着你去认领！</div>
+            <ul class="pagination">
+                {% if page_info.paginator.num_pages > 1 %}
+                    {% if page_info.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link"
+                               href="{% url 'task:page' def_sel.date def_sel.state page_info.previous_page_number %}">
+                                上一页
+                            </a>
+                        </li>
+                    {% endif %}
+                    {% for page in page_info.paginator.page_range %}
+                        {% if page_info.number == page %}
+                            <li class="page-item active">
+                                <a class="page-link" href="">{{ page }}</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item">
+                                <a class="page-link" href="{% url 'task:page' def_sel.date def_sel.state page %}">
+                                    {{ page }}
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    {% if page_info.has_next %}
+                        <li class="page-item">
+                            <a class="page-link"
+                               href="{% url 'task:page' def_sel.date def_sel.state page_info.next_page_number %}">
+                                下一页
+                            </a>
+                        </li>
                     {% endif %}
                 {% endif %}
-            </div>
-            <div>
-                <ul class="pagination">
-                    {% if page_info.paginator.num_pages > 1 %}
-                        {% if page_info.has_previous %}
-                            <li class="page-item">
-                                <a class="page-link"
-                                   href="{% url 'task:page' def_sel.date def_sel.state page_info.previous_page_number %}">
-                                    上一页
-                                </a>
-                            </li>
-                        {% endif %}
-                        {% for page in page_info.paginator.page_range %}
-                            {% if page_info.number == page %}
-                                <li class="page-item active">
-                                    <a class="page-link" href="">{{ page }}</a>
-                                </li>
-                            {% else %}
-                                <li class="page-item">
-                                    <a class="page-link" href="{% url 'task:page' def_sel.date def_sel.state page %}">
-                                        {{ page }}
-                                    </a>
-                                </li>
-                            {% endif %}
-                        {% endfor %}
-                        {% if page_info.has_next %}
-                            <li class="page-item">
-                                <a class="page-link"
-                                   href="{% url 'task:page' def_sel.date def_sel.state page_info.next_page_number %}">
-                                    下一页
-                                </a>
-                            </li>
-                        {% endif %}
-                    {% endif %}
-                </ul>
-            </div>
+            </ul>
         </div>
     </div>
 {% endblock %}
