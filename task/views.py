@@ -42,7 +42,7 @@ def task(request):
 
 def page(request, month, state, page):
     re = OptRecord(request)
-    re.opt_record()
+    # re.opt_record()
 
     f_hours = finish_hours(re.remote_ip)
 
