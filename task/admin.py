@@ -44,7 +44,7 @@ class ConfigsAdmin(admin.ModelAdmin):
 class ConfigsAdmin(admin.ModelAdmin):
     list_display = ['id', 'remoteIp', 'path', 'count', 'created', 'updated']
     search_fields = ['pcName']
-    ordering = ['id']
+    ordering = ['-updated']
 
 
 @admin.register(Percent)
