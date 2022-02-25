@@ -34,13 +34,13 @@ def task(request):
 
         def_sel = {'date': q_month, 'state': q_state}
 
-    page_info = page_infos(tasks, 10, 1)
+    page_info = page_infos(tasks, 3, 1)
 
     context = {'page_info': page_info, 'dates': dates, 'def_sel': def_sel, 'status': status, 'f_hours': f_hours}
     return render(request, 'task/task.html', context)
 
 
-def page(request, month, state, page_num):
+def page(request, month, state, page):
     re = OptRecord(request)
     re.opt_record()
 
@@ -52,7 +52,7 @@ def page(request, month, state, page_num):
 
     tasks = get_tasks(state, month)
 
-    page_info = page_infos(tasks, 10, page_num)
+    page_info = page_infos(tasks, 3, page)
 
     def_sel = {'date': month, 'state': state}
 
