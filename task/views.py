@@ -104,7 +104,6 @@ def score(request):
     re = OptRecord(request)
     re.opt_record()
 
-    up_all_score()
     t_dates = Score.objects.select_related('month').filter(month__state=1).values('month__month').annotate(
         Count('month'))
 
@@ -114,6 +113,8 @@ def score(request):
         cur_month = str(time.strftime("%Y%m"))
     else:
         cur_month = request.POST['month']
+
+    up_all_score(cur_month)
 
     sc = Score.objects.select_related('month').filter(month__month=cur_month).order_by('-score')
     context = {'dates': dates, 'sc': sc, 'cur_month': cur_month}
@@ -194,12 +195,11 @@ def up_b_score(tester, py_name, bug_infos, hours):
             Score.objects.create(month_id=hours.id, tester=tester, score=0, desc=desc, type='B')
 
 
-def up_all_score():
+def up_all_score(q_month):
     """
     更新当前月所有测试人员的积分
     """
-    cur_month = str(time.strftime("%Y%m"))
-    hours = Hours.objects.get(month=cur_month)
+    hours = Hours.objects.get(month=q_month)
     bug_infos = st_bugs()
 
     all_tester = User.objects.all()
@@ -296,10 +296,9 @@ def month_list(f_key, t_dates):
     cur_month = str(time.strftime("%Y%m"))
 
     dates = []
-    if t_dates:
-        for date in t_dates:
-            month = date[f'{f_key}__month']
-            dates.append(month)
-    else:
+    for date in t_dates:
+        month = date[f'{f_key}__month']
+        dates.append(month)
+    if cur_month not in dates:
         dates.append(cur_month)
     return dates
