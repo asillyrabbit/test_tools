@@ -29,8 +29,9 @@ class ConfigsAdmin(admin.ModelAdmin):
 class ConfigsAdmin(admin.ModelAdmin):
     list_display = ['id', 'date', 'type', 'item', 'name', 'hours', 'tester', 'status', 'delay', 'start', 'end',
                     'updated']
-    search_fields = ['name']
+    search_fields = ['tester']
     ordering = ['-id']
+    list_per_page = 15
 
 
 @admin.register(Hours)
