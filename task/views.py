@@ -148,7 +148,10 @@ def up_h_score(tester, value, tester_hours, rate, hours):
     h:hours
     """
     sc = Score.objects.filter(tester=tester, month=hours.id, type='H')
-    desc = f'本月完成工时 {tester_hours} h，工作饱和度 {rate} %'
+    if rate > 100:
+        desc = f'勤劳小蜜蜂（本月完成工时 {tester_hours} h，工作饱和度 {rate} %）'
+    else:
+        desc = f'本月完成工时 {tester_hours} h，工作饱和度 {rate} %'
 
     if sc and sc[0].desc != desc:
         sc[0].score = value
