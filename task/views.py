@@ -116,7 +116,7 @@ def score(request):
 
     up_all_score(cur_month)
 
-    sc = Score.objects.select_related('month').filter(month__month=cur_month).order_by('-score')
+    sc = Score.objects.select_related('month').filter(month__month=cur_month).order_by('-score', 'desc')
     context = {'dates': dates, 'sc': sc, 'cur_month': cur_month}
     return render(request, 'task/score.html', context)
 
