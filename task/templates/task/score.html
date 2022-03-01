@@ -59,6 +59,11 @@
                         <td>{{ score.score }}</td>
                         <td class="desc">
                             {{ score.desc }}
+                            {% if '小蜜蜂' in score.desc %}
+                                <img src="{% static 'image/honeybee.png' %}" alt='winner'
+                                     class="align-self-center mr-3 img-fluid"
+                                     style="width:100px;max-width: 6%">
+                            {% endif %}
                         </td>
                     </tr>
                 {% endif %}
@@ -81,7 +86,12 @@
                         <td>{{ score.tester }}</td>
                         <td>{{ score.score }}</td>
                         <td class="desc">
-                            {{ score.desc }}
+                            {% if '小能手' in score.desc %}
+                                {{ score.desc }}
+                                <img src="{% static 'image/winner.png' %}" alt='winner'
+                                     class="align-self-center mr-3 img-fluid"
+                                     style="width:100px;max-width: 6%">
+                            {% endif %}
                         </td>
                     </tr>
                 {% endif %}
