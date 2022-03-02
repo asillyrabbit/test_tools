@@ -205,7 +205,7 @@ def up_all_score(q_month):
     更新当前月所有测试人员的积分
     """
     hours = Hours.objects.get(month=q_month)
-    bug_infos = st_bugs()
+    bug_infos = st_bugs(q_month)
 
     all_tester = User.objects.all()
     for tester in all_tester:
@@ -215,13 +215,14 @@ def up_all_score(q_month):
         up_b_score(tester.name, tester.pinyin, bug_infos, hours)
 
 
-def st_bugs():
+def st_bugs(month):
     """
     st：统计
     """
     # 执行命令集
     server_info = eval(EnvInfo.objects.get(ident='chandao').info)
     query_commd = ComInfo.objects.get(ident='q_openedby').command
+    query_commd = f'{query_commd} {month}'
 
     # 链接服务器
     myssh = MySSH(**server_info)
