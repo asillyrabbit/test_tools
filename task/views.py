@@ -19,6 +19,7 @@ def task(request):
     t_dates = Task.objects.select_related('date').filter(date__state=1).values('date__month').annotate(Count('date'))
     cur_day = str(time.strftime("%Y-%m-%d"))
     Task.objects.select_related('status').filter(~Q(status__name='已完成'), end__lt=cur_day).update(delay=0)
+    Task.objects.select_related('status').filter(~Q(status__name='已完成'), end=cur_day).update(delay=2)
 
     dates = month_list('date', t_dates)
     status = Status.objects.all()

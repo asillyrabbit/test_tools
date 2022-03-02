@@ -64,7 +64,7 @@ class Task(models.Model):
     hours = models.FloatField('工时（h）', max_length=5)
     tester = models.CharField('测试负责人', max_length=10, blank=True)
     status = models.ForeignKey(Status, on_delete=models.CASCADE, verbose_name='状态')
-    delay = models.IntegerField('延期', choices=((0, '是'), (1, '否')), default=1)
+    delay = models.IntegerField('延期', choices=((0, '是'), (1, '否'), (2, '即将')), default=1)
     start = models.DateField('开始时间')
     end = models.DateField('截止时间')
     updated = models.DateField('更新时间', auto_now=True)

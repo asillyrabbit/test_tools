@@ -110,6 +110,9 @@
                         {% if task.delay == 0 %}
                             <td class="t-state">{{ task.status }} <span
                                     class="badge badge-warning">已延期</span></td>
+                        {% elif task.delay == 2 %}
+                            <td class="t-state">{{ task.status }} <span
+                                    class="badge badge badge-info">今日到期</span></td>
                         {% else %}
                             <td class="t-state">{{ task.status }}</td>
                         {% endif %}
