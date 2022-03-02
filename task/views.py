@@ -87,10 +87,11 @@ def update(requests):
             button = f'<button type="button" class="opt-btn btn btn-secondary" disabled>认领</button>'
         else:
             t_task.status_id = 3
+            if t_task.delay == 2:
+                t_task.delay = 1
             button = f'<button type="button" class="opt-btn btn btn-secondary" disabled>完成</button>'
         t_task.save()
     else:
-        # tester = t_task.tester
         tester = '路人'
         button = f'<button type="button" class="opt-btn btn btn-secondary" data-toggle="tooltip" ' \
                  'data-placement="top" title="仅支持测试人员操作！" disabled>无效</button>'
