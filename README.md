@@ -23,7 +23,7 @@
 
 #### 执行页面示例
 - __任务管理__：极简任务管理，没有多有操作。
-![任务管理](https://github.com/asillyrabbit/temp/blob/main/%E4%BB%BB%E5%8A%A1%E7%AE%A1%E7%90%86-%E8%BF%9B%E8%A1%8C%E4%B8%AD.PNG?raw=true)
+![任务管理](https://github.com/asillyrabbit/temp/blob/main/%E4%BB%BB%E5%8A%A1%E5%88%97%E8%A1%A8.PNG?raw=true)
 
 - __积分排行__：绑定任务管理、禅道，实时统计积分排行。
 ![积分排行](https://github.com/asillyrabbit/temp/blob/main/%E7%A7%AF%E5%88%86%E6%8E%92%E8%A1%8C.PNG?raw=true)
