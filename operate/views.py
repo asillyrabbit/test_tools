@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from test_tools.common import MyDB, MySSH, GetFile
+from test_tools.common import MyDB, MySSH, GetFile, OptRecord
 from config.models import EnvInfo, ComInfo
 from django.http import HttpResponse, FileResponse, JsonResponse
 import time
@@ -12,23 +12,41 @@ test_report_name = '知了v1.2.0-测试日报.xlsx'
 
 # Create your views here.
 def search(request):
+    re = OptRecord(request)
+    re.opt_record()
+
     if request.method != 'POST':
         return render(request, 'operate/search.html')
     else:
         mobile = request.POST['mobile']
 
-    query_info = f"SELECT a.id,a.mobile,a.nickname,b.third_account,b.apptype,b.created " \
-                 f"FROM gyy_user_t a,gyy_user_third_t b where a.id=b.userid and a.mobile={mobile}"
+    q_all = f"select a.id,a.mobile,a.nickname,b.third_account,b.apptype,b.created " \
+            f"from gyy_user_t a,gyy_user_third_t b where a.id=b.userid and a.mobile={mobile}"
+
+    q_exist = f"{q_all} and b.apptype='2'"
+
+    q_doc = f"select userid,mobile,name,'APP直接注册用户' as openid,2 as app_type,created from gyy_doctor_t where mobile={mobile} " \
+            f"order by updated desc limit 1"
 
     dbinfo = eval(EnvInfo.objects.get(ident='TestDB').info)
     mydb = MyDB(**dbinfo)
     con = mydb.connect()
     cur = con.cursor()
-    cur.execute(query_info)
+
+    cur.execute(q_exist)
+    doc_exist = cur.fetchall()
+    cur.execute(q_all)
     uinfos = cur.fetchall()
-    con.close()
 
     userinfos = []
+
+    if len(doc_exist) == 0 and uinfos:
+        cur.execute(q_doc)
+        doc = cur.fetchone()
+        doc_info = list(doc)
+        userinfos.append(doc_info)
+
+    con.close()
 
     for uinfo in uinfos:
         userinfos.append(list(uinfo))
@@ -93,7 +111,10 @@ def clear(request):
     conn.close()
 
     # 验证清理结果
-    query_info = f"select mobile from gyy_user_t where id={userid}"
+    if apptype == '医生':
+        query_info = f"select mobile from gyy_user_t where id={userid} and utype='1'"
+    else:
+        query_info = f"select mobile from gyy_user_t where id={userid} and utype='0'"
     cur.execute(query_info)
     new_mobile = cur.fetchall()[0][0]
     con.close()

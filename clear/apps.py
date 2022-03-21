@@ -1,5 +1,5 @@
 from django.apps import AppConfig
 
 
-class OperateConfig(AppConfig):
+class ClearConfig(AppConfig):
     name = 'clear'

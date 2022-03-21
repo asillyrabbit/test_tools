@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'config',
     'operate',
     'task',
+    'clear',
 
     # 第三方应用程序
     'bootstrap4',

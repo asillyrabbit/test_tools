@@ -24,6 +24,7 @@ urlpatterns = [
     path('', include('config.urls')),
     path('opt/', include('operate.urls')),
     path('task/', include('task.urls')),
+    path('clear/', include('clear.urls')),
 
     # # 设置项目上线的静态资源路径
     url(r'^static/(?P<path>.*)$', static.serve,

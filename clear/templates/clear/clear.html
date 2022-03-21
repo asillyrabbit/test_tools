@@ -1,0 +1,73 @@
+{% extends 'config/search.html' %}
+
+{% block content %}
+    <style type="text/css">
+        table, th, tr, td {
+            text-align: center;
+            vertical-align: middle !important;
+        }
+
+    </style>
+    <div>
+        {% if info_len > 0 %}
+            <table class="table table-bordered" style="margin-top: 13px">
+                <thead class="t-head thead-light">
+                <tr>
+                    <th>用户id</th>
+                    <th>手机号</th>
+                    <th>姓名</th>
+                    <th>openid</th>
+                    <th>用户类型</th>
+                    <th>清scan表？</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for user_info in user_infos %}
+                    <tr>
+                        <td id="{{ user_info.0 }}">{{ user_info.0 }}</td>
+                        <td id="{{ user_info.1 }}">{{ user_info.1 }}</td>
+                        <td>{{ user_info.2 }}</td>
+                        <td id="{{ user_info.3 }}" style="text-align: left">{{ user_info.3 }}</td>
+                        <td id="{{ user_info.4 }}">{{ user_info.4 }}</td>
+                        <td>
+                            <select class="{{ user_info.3 }} form-control" name="scan" style="width: auto;">
+                                <option>不清</option>
+                                <option>清</option>
+                            </select>
+                        </td>
+                        <td>
+                            <button class="{{ user_info.0 }} btn btn-primary">操作</button>
+                        </td>
+                        <script>
+                            $('.{{ user_info.0 }}').click(function () {
+
+                                $.ajax({
+                                        url: '/clear/update/',
+                                        type: 'get',
+                                        data: {
+                                            'userid': '{{ user_info.0 }}',
+                                            'mobile': '{{ user_info.1 }}',
+                                            'openid': '{{ user_info.3 }}',
+                                            'utype': '{{ user_info.4 }}',
+                                            'scan': $(".{{ user_info.3 }}").val()
+                                        },
+                                        beforeSend: function () {
+                                        },
+                                        success: function (response) {
+                                            document.getElementById('result').innerHTML = response;
+                                        }
+                                    }
+                                )
+                            })
+                        </script>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <div id="result"></div>
+        {% elif info_len == 0 %}
+            <div class="alert alert-info" style="margin-top: 13px">没有查询到任务记录！</div>
+        {% endif %}
+    </div>
+{% endblock %}

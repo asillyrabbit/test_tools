@@ -1,0 +1,16 @@
+{% extends 'config/base.html' %}
+{% load bootstrap4 %}
+
+{% block search %}
+    <form class="form-inline" method="post" action="{% url url %}">
+        {% csrf_token %}
+        <div class="input-group">
+            <input name="mobile" type="text" class="form-control"
+                   oninput="setCustomValidity(''); checkValidity(); setCustomValidity(validity.valid ? '' :'请输入正确的手机号！');"
+                   pattern="^1[3456789][0-9]{9}$" placeholder="请输入手机号" required/>
+            <div>
+                <button class="btn btn-success" type="submit">搜索</button>
+            </div>
+        </div>
+    </form>
+{% endblock search %}
