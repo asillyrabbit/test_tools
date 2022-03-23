@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class OperateConfig(AppConfig):
-    name = 'clear'
+    name = 'operate'

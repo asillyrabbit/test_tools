@@ -5,4 +5,4 @@ from django.shortcuts import render
 def index(request):
     name = request.POST
     context = {'name': name}
-    return render(request, 'config/index.html',context)
+    return render(request, 'config/index.html', context)
