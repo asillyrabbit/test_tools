@@ -28,51 +28,75 @@
             .t_head, .t_body, th {
                 text-align: center;
                 vertical-align: middle !important;
-                {#width: 300px;#}
+            {#width: 300px;#}
             }
         </style>
-
-        {% if supp_num > 0 %}
-            <div>
-                {% if supp_num > 1 %}
-                    <div style="color: red">
-                        <p>供应商错误！当前处方包含{{ supp_num }}个供应商：{{ supp_str }}<p>
-                    </div>
-                {% endif %}
-                {% if supp_num == 1 %}
-                    <div style="color: royalblue">
-                        <p>请确认供应商是否正确！</p>
-                    </div>
-                {% endif %}
-                <table class="table table-bordered table-sm col-xs-12">
-                    <thead class="thead-light t_head">
+        {% if comparison == 1 %}
+            <div style="color: red">
+                <p>表gyy_prescription_medical_t与表gyy_suplier_medical_t中的供应商不一致！
+                <p>
+            </div>
+            <table class="table table-bordered table-sm col-xs-12">
+                <thead class="thead-light t_head">
+                <tr>
+                    <th>药材信息</th>
+                    <th>pre_med_t</th>
+                    <th>sup_med_t</th>
+                </tr>
+                </thead>
+                <tbody class="t_body">
+                {% for com_sup in com_sups %}
                     <tr>
-                        <th colspan="2">供应商信息</th>
-                        <th colspan="2">药材信息</th>
+                        <td>{{ com_sup.0 }}</td>
+                        <td>{{ com_sup.2 }}</td>
+                        <td>{{ com_sup.1 }}</td>
                     </tr>
-                    <tr>
-                        <th>ID</th>
-                        <th>名称</th>
-                        <th>ID</th>
-                        <th>名称</th>
-                    </tr>
-                    </thead>
-                    <tbody class="t_body">
-                    {% for pres_info in pres_infos %}
+                {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            {% if supp_num > 0 %}
+                <div>
+                    {% if supp_num > 1 %}
+                        <div style="color: red">
+                            <p>供应商错误！当前处方包含{{ supp_num }}个供应商：{{ supp_str }}<p>
+                        </div>
+                    {% endif %}
+                    {% if supp_num == 1 %}
+                        <div style="color: royalblue">
+                            <p>请确认供应商是否正确！</p>
+                        </div>
+                    {% endif %}
+                    <table class="table table-bordered table-sm col-xs-12">
+                        <thead class="thead-light t_head">
                         <tr>
-                            <td>{{ pres_info.0 }}</td>
-                            <td>{{ pres_info.1 }}</td>
-                            <td>{{ pres_info.2 }}</td>
-                            <td>{{ pres_info.3 }}</td>
+                            <th colspan="2">供应商信息</th>
+                            <th colspan="2">药材信息</th>
                         </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        {% elif supp_num == 0 %}
-            <div class="alert alert-info col-md-6">
-                <strong>没有查询到任何信息，请检查订单号是否正确！（仅支持测试环境）</strong>
-            </div>
+                        <tr>
+                            <th>ID</th>
+                            <th>名称</th>
+                            <th>ID</th>
+                            <th>名称</th>
+                        </tr>
+                        </thead>
+                        <tbody class="t_body">
+                        {% for pres_info in pres_infos %}
+                            <tr>
+                                <td>{{ pres_info.0 }}</td>
+                                <td>{{ pres_info.1 }}</td>
+                                <td>{{ pres_info.2 }}</td>
+                                <td>{{ pres_info.3 }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% elif supp_num == 0 %}
+                <div class="alert alert-info col-md-6">
+                    <strong>没有查询到任何信息，请检查订单号是否正确！（仅支持测试环境）</strong>
+                </div>
+            {% endif %}
         {% endif %}
     </div>
 {% endblock content %}

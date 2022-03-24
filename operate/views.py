@@ -547,22 +547,50 @@ def checkpres(requests):
                    where b.prescripiton_id in (select c.relation_id from gyy_order_t c \
                    where c.order_no='{orderno}')) and a.supplier=d.id group by a.supplier;"
 
+        q_com_sup = f"select a.name,b.name as sup_med_t,c.name as pre_med_t from gyy_suplier_medical_t a," \
+                    f"gyy_supplier_t b,(select c1.s_m_id,c2.name from gyy_prescription_medical_t c1,gyy_supplier_t c2 " \
+                    f"where c1.supplier=c2.id and c1.prescripiton_id in(select relation_id from gyy_order_t where " \
+                    f"order_no='{orderno}')) as c where a.id=c.s_m_id and a.supplier=b.id"
+
         mydb = MyDB(**dbinfo)
         con = mydb.connect()
         cur = con.cursor()
-        cur.execute(q_pres)
-        pres_infos = cur.fetchall()
-        cur.execute(q_supp)
-        supp_infos = cur.fetchall()
+
+        cur.execute(q_com_sup)
+        com_sups = cur.fetchall()
+
+        comparison = 0
+        for com_sup in com_sups:
+            if com_sup[1] != com_sup[2]:
+                comparison = 1
+                break
+
+        if comparison == 1:
+            context = {'com_sups': com_sups, 'comparison': comparison}
+        else:
+            cur.execute(q_pres)
+            pres_infos = cur.fetchall()
+            cur.execute(q_supp)
+            supp_infos = cur.fetchall()
+
+            supp_num = len(supp_infos)
+            supp_str = ''
+            for supp in supp_infos:
+                supp_str = supp_str + supp[0] + '、'
+
+            supp_str = supp_str.strip('、')
+
+            context = {'pres_infos': pres_infos, 'supp_num': supp_num, 'supp_str': supp_str, 'comparison': comparison}
+
         cur.close()
-
-        supp_num = len(supp_infos)
-        supp_str = ''
-        for supp in supp_infos:
-            supp_str = supp_str + supp[0] + '、'
-
-        supp_str = supp_str.strip('、')
-
-        context = {'pres_infos': pres_infos, 'supp_num': supp_num, 'supp_str': supp_str}
+        con.close()
 
         return render(requests, 'operate/checkpres.html', context)
+
+
+def check_supp(supp_info):
+    supp_info = (('红参', '北京门诊部药房', '仟草药业(精选)'), ('枸杞子', '北京门诊部药房', '仟草药业(精选)'))
+    for supp in supp_info:
+        if supp[1] != supp[2]:
+            break
+    return
