@@ -536,28 +536,51 @@ def checkpres(requests):
 
         dbinfo = eval(EnvInfo.objects.get(ident='TestDB').info)
 
-        q_pres = f"select d.id,d.shot_name,a.id,a.name \
-                       from gyy_suplier_medical_t a,gyy_supplier_t d where a.id \
-                       in (select b.s_m_id from gyy_prescription_medical_t b where b.prescripiton_id \
-                       in (select c.relation_id from gyy_order_t c where c.order_no='{orderno}')) \
-                       and a.supplier=d.id;"
+        sup_t = "gyy_supplier_t"
+        pre_med_t = "gyy_prescription_medical_t"
+        sup_med_t = "gyy_suplier_medical_t"
+        pre_pat_med_t = "gyy_prescription_patent_medical_t"
+        sup_pat_med_t = "gyy_suplier_patent_medical_t"
+        order_t = "gyy_order_t"
 
-        q_supp = f"select d.name from gyy_suplier_medical_t a,gyy_supplier_t d \
-                   where a.id in (select b.s_m_id from gyy_prescription_medical_t b \
-                   where b.prescripiton_id in (select c.relation_id from gyy_order_t c \
-                   where c.order_no='{orderno}')) and a.supplier=d.id group by a.supplier;"
+        q_med_pres = f"select d.id,d.shot_name,a.id,a.name from {sup_med_t} a,{sup_t} d where a.id in" \
+                     f" (select b.s_m_id from {pre_med_t} b where b.prescripiton_id in (select c.relation_id " \
+                     f"from {order_t} c where c.order_no='{orderno}')) and a.supplier=d.id;"
 
-        q_com_sup = f"select a.name,b.name as sup_med_t,c.name as pre_med_t from gyy_suplier_medical_t a," \
-                    f"gyy_supplier_t b,(select c1.s_m_id,c2.name from gyy_prescription_medical_t c1,gyy_supplier_t c2 " \
-                    f"where c1.supplier=c2.id and c1.prescripiton_id in(select relation_id from gyy_order_t where " \
-                    f"order_no='{orderno}')) as c where a.id=c.s_m_id and a.supplier=b.id"
+        q_med_supp = f"select d.name from {sup_med_t} a,{sup_t} d where a.id in (select b.s_m_id from {pre_med_t} " \
+                     f"b where b.prescripiton_id in (select c.relation_id from {order_t} c where " \
+                     f"c.order_no='{orderno}')) and a.supplier=d.id group by a.supplier;"
+
+        q_pat_pres = f"select d.id,d.shot_name,a.id,a.name from {sup_pat_med_t} a,gyy_supplier_t d where a.id in " \
+                     f"(select b.s_m_id from {pre_pat_med_t} b where b.prescripiton_id in (select c.relation_id " \
+                     f"from {order_t} c where c.order_no='{orderno}')) and a.supplier=d.id;"
+
+        q_pat_supp = f"select d.name from {sup_pat_med_t} a,gyy_supplier_t d where a.id in (select b.s_m_id from " \
+                     f"{pre_pat_med_t} b where b.prescripiton_id in (select c.relation_id from {order_t} c where " \
+                     f"c.order_no='{orderno}')) and a.supplier=d.id group by a.supplier;"
+
+        q_med = f"select a.name,b.name as sup_med_t,c.name as pre_med_t from {sup_med_t} a," \
+                f"{sup_t} b,(select c1.s_m_id,c2.name from {pre_med_t} c1,{sup_t} c2 " \
+                f"where c1.supplier=c2.id and c1.prescripiton_id in(select relation_id from {order_t} where " \
+                f"order_no='{orderno}' and stype='0')) as c where a.id=c.s_m_id and a.supplier=b.id"
+
+        q_pat = f"select a.name,b.name as sup_med_t,c.name as pre_med_t from {sup_pat_med_t} a," \
+                f"{sup_t} b,(select c1.s_m_id,c2.name from {pre_pat_med_t} c1," \
+                f"{sup_t} c2 where c1.supplier=c2.id and c1.prescripiton_id in(select relation_id from " \
+                f"{order_t} where order_no='{orderno}' and stype='0')) as c where a.id=c.s_m_id and a.supplier=b.id"
 
         mydb = MyDB(**dbinfo)
         con = mydb.connect()
         cur = con.cursor()
 
-        cur.execute(q_com_sup)
+        cur.execute(q_med)
         com_sups = cur.fetchall()
+
+        p_type = 'med'
+        if not com_sups:
+            cur.execute(q_pat)
+            com_sups = cur.fetchall()
+            p_type = 'pat'
 
         comparison = 0
         for com_sup in com_sups:
@@ -568,10 +591,16 @@ def checkpres(requests):
         if comparison == 1:
             context = {'com_sups': com_sups, 'comparison': comparison}
         else:
-            cur.execute(q_pres)
-            pres_infos = cur.fetchall()
-            cur.execute(q_supp)
-            supp_infos = cur.fetchall()
+            if p_type == 'med':
+                cur.execute(q_med_pres)
+                pres_infos = cur.fetchall()
+                cur.execute(q_med_supp)
+                supp_infos = cur.fetchall()
+            else:
+                cur.execute(q_pat_pres)
+                pres_infos = cur.fetchall()
+                cur.execute(q_pat_supp)
+                supp_infos = cur.fetchall()
 
             supp_num = len(supp_infos)
             supp_str = ''
@@ -586,11 +615,3 @@ def checkpres(requests):
         con.close()
 
         return render(requests, 'operate/checkpres.html', context)
-
-
-def check_supp(supp_info):
-    supp_info = (('红参', '北京门诊部药房', '仟草药业(精选)'), ('枸杞子', '北京门诊部药房', '仟草药业(精选)'))
-    for supp in supp_info:
-        if supp[1] != supp[2]:
-            break
-    return
