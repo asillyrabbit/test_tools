@@ -27,15 +27,18 @@
                     <tr>
                         <td id="{{ user_info.0 }}">{{ user_info.0 }}</td>
                         <td id="{{ user_info.1 }}">{{ user_info.1 }}</td>
-                        <td>{{ user_info.2 }}</td>
+                        <td id="{{ user_info.2 }}">{{ user_info.2 }}</td>
                         <td id="{{ user_info.3 }}" style="text-align: left">{{ user_info.3 }}</td>
                         <td id="{{ user_info.4 }}">{{ user_info.4 }}</td>
-                        <td>
-                            <select class="{{ user_info.3 }} form-control" name="scan" style="width: auto;">
-                                <option>不清</option>
-                                <option>清</option>
-                            </select>
-                        </td>
+                        <td style="text-align: left">
+                            {% if user_info.4 == '销售' %}
+                            {% else %}
+                                <select class="{{ user_info.3 }} form-control" name="scan" style="width: auto;">
+                                    <option>不清</option>
+                                    <option>清</option>
+                                </select>
+                                </td>
+                            {% endif %}
                         <td>
                             <button class="{{ user_info.0 }} btn btn-primary">操作</button>
                         </td>
@@ -48,6 +51,7 @@
                                         data: {
                                             'userid': '{{ user_info.0 }}',
                                             'mobile': '{{ user_info.1 }}',
+                                            'name': '{{ user_info.2 }}',
                                             'openid': '{{ user_info.3 }}',
                                             'utype': '{{ user_info.4 }}',
                                             'scan': $(".{{ user_info.3 }}").val()

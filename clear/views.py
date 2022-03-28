@@ -33,12 +33,18 @@ def clear(request):
     q_doc = f"select userid,mobile,name,'无（APP注册用户）' as openid,2 as app_type,created " \
             f"from gyy_doctor_t where mobile={mobile} order by updated desc limit 1"
 
+    q_sales = f"select id,mobile,name,openid,'销售' as apptype,created from gyy_sales_t where " \
+              f"mobile='{mobile}' limit 1"
+
     cur.execute(is_exist)
     doc_exist = cur.fetchall()
     cur.execute(q_all)
     u_infos = cur.fetchall()
     cur.execute(q_doc)
     doc_info = cur.fetchone()
+    cur.execute(q_sales)
+    sale_info = cur.fetchone()
+    cur.close()
     con.close()
 
     user_infos = []
@@ -48,6 +54,9 @@ def clear(request):
 
     for u_info in u_infos:
         user_infos.append(list(u_info))
+
+    if sale_info is not None:
+        user_infos.append(list(sale_info))
 
     for user_info in user_infos:
         if user_info[4] == 1:
@@ -69,48 +78,65 @@ def clear(request):
 
 
 def update(requests):
+    utype = requests.GET['utype']
     userid = requests.GET['userid']
     mobile = requests.GET['mobile']
     openid = requests.GET['openid']
-    scan = requests.GET['scan']
-    utype = requests.GET['utype']
-
-    if scan == '清':
-        scan = 1
-    else:
-        scan = 0
-
-    server_info = eval(EnvInfo.objects.get(ident='TestServer').info)
-    clear_doc = ComInfo.objects.get(ident='doc').command
-    clear_pat = ComInfo.objects.get(ident='pat').command
 
     dbinfo = eval(EnvInfo.objects.get(ident='TestDB').info)
     mydb = MyDB(**dbinfo)
     con = mydb.connect()
     cur = con.cursor()
 
-    if utype == '患者':
-        command = f"{clear_pat} {userid} {openid} 1"
-    if utype == '医生':
-        command = f"{clear_doc} {userid} {openid} {scan}"
-    if utype == '泰康用户':
-        command = f"{clear_pat} {userid} {openid} 3"
-    if utype == '广盛康':
-        command = f"{clear_pat} {userid} {openid} 5"
-        up_sql = f"update gyy_cooperation_user_t set mobile={mobile}+100000000,name='作废卡' where mobile='{mobile}'"
-        cur.execute(up_sql)
-        con.commit()
-
+    command = ''
+    server_info = eval(EnvInfo.objects.get(ident='TestServer').info)
     myssh = MySSH(**server_info)
     conn = myssh.connect()
+
+    if utype == '销售':
+        new_mobile = int(mobile) + 1000000000
+        name = requests.GET['name']
+        up_sql = f"update gyy_sales_t set name='{name}_del',mobile='{new_mobile}',openid='{openid}_del' where id={userid}"
+        cur.execute(up_sql)
+        con.commit()
+        query_info = f"select mobile from gyy_sales_t where id={userid}"
+        com_command = ComInfo.objects.get(ident='del_redis').command
+        # command在下面公共代码执行
+        command = com_command.replace('keywords', f'ggy::s::sale::openid::{openid}')
+        command1 = com_command.replace('keywords', f'ggy::s::sale::saleid::{userid}')
+        stdin, stdout, stderr = conn.exec_command(command1)
+        out = stdout.read()
+    else:
+        scan = requests.GET['scan']
+        if scan == '清':
+            scan = 1
+        else:
+            scan = 0
+
+        clear_doc = ComInfo.objects.get(ident='doc').command
+        clear_pat = ComInfo.objects.get(ident='pat').command
+
+        if utype == '患者':
+            command = f"{clear_pat} {userid} {openid} 1"
+        if utype == '医生':
+            command = f"{clear_doc} {userid} {openid} {scan}"
+        if utype == '泰康用户':
+            command = f"{clear_pat} {userid} {openid} 3"
+        if utype == '广盛康':
+            command = f"{clear_pat} {userid} {openid} 5"
+            up_sql = f"update gyy_cooperation_user_t set mobile={mobile}+100000000,name='作废卡' where mobile='{mobile}'"
+            cur.execute(up_sql)
+            con.commit()
+
+        query_info = f"select mobile from gyy_user_t where id={userid}"
+
     stdin, stdout, stderr = conn.exec_command(command)
     out = stdout.read()
     conn.close()
 
-    query_info = f"select mobile from gyy_user_t where id={userid}"
-
     cur.execute(query_info)
     new_mobile = cur.fetchall()[0][0]
+    cur.close()
     con.close()
 
     if mobile == new_mobile:
