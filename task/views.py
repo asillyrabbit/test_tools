@@ -53,7 +53,7 @@ def page(request, month, state, page):
 
     tasks = get_tasks(state, month)
 
-    page_info = page_infos(tasks, 10, page)
+    page_info = page_infos(tasks, 15, page)
 
     def_sel = {'date': month, 'state': state}
 
@@ -64,7 +64,8 @@ def page(request, month, state, page):
 def get_tasks(state, month):
     state_id = Status.objects.get(name=state)
     if state == '已完成':
-        tasks = Task.objects.select_related('date').filter(date__month=month, status=state_id).order_by('-updated')
+        tasks = Task.objects.select_related('date').filter(date__month=month, status=state_id).order_by('-updated',
+                                                                                                        '-id')
     else:
         tasks = Task.objects.select_related('date').filter(date__month=month, status=state_id).order_by('end')
     return tasks
