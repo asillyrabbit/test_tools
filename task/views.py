@@ -192,10 +192,10 @@ def up_b_score(tester, py_name, bug_infos, hours):
         if py_name == winner:
             desc = names[py_name].strip('，')
             desc = f'捉虫小能手（{desc}）'
-            Score.objects.create(month_id=hours.id, tester=tester, score=5, desc=desc)
+            Score.objects.create(month_id=hours.id, tester=tester, score=5, desc=desc, type='B')
         elif (py_name != winner) and (py_name in names.keys()):
             desc = names[py_name].strip('，')
-            Score.objects.create(month_id=hours.id, tester=tester, score=0, desc=desc)
+            Score.objects.create(month_id=hours.id, tester=tester, score=0, desc=desc, type='B')
         else:
             desc = '没有提交Bug'
             Score.objects.create(month_id=hours.id, tester=tester, score=0, desc=desc, type='B')
