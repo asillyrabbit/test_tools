@@ -124,7 +124,7 @@ def update(requests):
         out = stdout.read()
     else:
         scan = requests.GET['scan']
-        if scan == '清':
+        if scan == '清理':
             scan = 1
         else:
             scan = 0
