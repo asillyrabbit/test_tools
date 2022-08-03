@@ -34,16 +34,20 @@
                             {% if user_info.4 == '销售' %}
                             {% else %}
                                 <select class="{{ user_info.3 }} form-control" name="scan" style="width: auto;">
+                                    <option>清理</option>
                                     <option>不清</option>
-                                    <option>清</option>
                                 </select>
                                 </td>
                             {% endif %}
                         <td>
-                            <button class="{{ user_info.0 }} btn btn-primary">操作</button>
+                            {% if user_info.6 == 0 %}
+                                <button class="{{ user_info.4 }} btn btn-primary">操作</button>
+                            {% else %}
+                                <button class="{{ user_info.4 }} btn btn-secondary" disabled>操作</button>
+                            {% endif %}
                         </td>
                         <script>
-                            $('.{{ user_info.0 }}').click(function () {
+                            $('.{{ user_info.4 }}').click(function () {
 
                                 $.ajax({
                                         url: '/clear/update/',
