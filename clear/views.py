@@ -56,7 +56,7 @@ def clear(request):
     if sale_info is not None:
         user_infos.append(list(sale_info))
 
-    print(user_infos)
+    # print(user_infos)
 
     for user_info in user_infos:
         if user_info[4] == 1:
