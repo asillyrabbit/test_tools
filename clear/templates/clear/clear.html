@@ -31,7 +31,7 @@
                         <td id="{{ user_info.3 }}" style="text-align: left">{{ user_info.3 }}</td>
                         <td id="{{ user_info.4 }}">{{ user_info.4 }}</td>
                         <td style="text-align: left">
-                            {% if user_info.4 == '销售' %}
+                            {% if user_info.4 == '销售' or user_info.4 == '医拉医' %}
                             {% else %}
                                 <select class="{{ user_info.3 }} form-control" name="scan" style="width: auto;">
                                     <option>清理</option>

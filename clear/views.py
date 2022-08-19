@@ -36,6 +36,10 @@ def clear(request):
     q_sales = f"select id,mobile,name,openid,'销售' as apptype,created from gyy_sales_t where " \
               f"mobile='{mobile}' limit 1"
 
+    # 查询医拉医
+    q_yly = f"select doctor_id,mobile,'' as name,openid,'医拉医' as apptype,created from gyy_scan_doctor_t " \
+            f"where mobile='{mobile}' limit 1"
+
     cur.execute(is_exist)
     doc_exist = cur.fetchall()
     cur.execute(q_all)
@@ -44,6 +48,9 @@ def clear(request):
     doc_info = cur.fetchone()
     cur.execute(q_sales)
     sale_info = cur.fetchone()
+    cur.execute(q_yly)
+    yly_info = cur.fetchone()
+
 
     user_infos = []
 
@@ -55,6 +62,9 @@ def clear(request):
 
     if sale_info is not None:
         user_infos.append(list(sale_info))
+
+    if yly_info is not None:
+        user_infos.append(list(yly_info))
 
     # print(user_infos)
 
@@ -68,6 +78,8 @@ def clear(request):
         elif user_info[4] == 5:
             user_info[4] = '广盛康'
         elif user_info[4] == '销售':
+            pass
+        elif user_info[4] == '医拉医':
             pass
         else:
             app_id = user_info[4]
@@ -122,6 +134,14 @@ def update(requests):
         command1 = com_command.replace('keywords', f'ggy::s::sale::saleid::{userid}')
         stdin, stdout, stderr = conn.exec_command(command1)
         out = stdout.read()
+
+    elif utype == '医拉医':
+        new_mobile = int(mobile) + 1000000000
+        up_sql = f"update gyy_scan_doctor_t set mobile='{new_mobile}',openid='{openid}_del' where doctor_id={userid}"
+        cur.execute(up_sql)
+        con.commit()
+        com_command = ComInfo.objects.get(ident='del_redis').command
+        command = com_command.replace('keywords', f'ggy::s::openid::{openid}')
     else:
         scan = requests.GET['scan']
         if scan == '清理':
