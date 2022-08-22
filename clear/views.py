@@ -89,7 +89,7 @@ def clear(request):
             user_info[4] = app_name
         user_info[5] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(user_info[5]))
 
-        if user_info[3].endswith('_bak'):
+        if user_info[3] is not None and user_info[3].endswith('_bak'):
             user_info.append(1)
         else:
             user_info.append(0)
