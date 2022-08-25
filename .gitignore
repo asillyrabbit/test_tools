@@ -1,10 +1,7 @@
 __pycache__/
 .idea/
 tt_env/
-db.sqlite3
-0005_percent.py
-0006_percent_ident.py
-0013_auto_20220302_1356.py
 migrations/
 settings.py
 db*.sqlite3
+task/migrations/
