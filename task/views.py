@@ -244,7 +244,14 @@ def finish_hours(remote_ip):
     """
     tester = User.objects.filter(bindIp=remote_ip)
     cur_month = str(time.strftime("%Y%m"))
-    hours = Hours.objects.get(month=cur_month)
+    # hours = Hours.objects.get(month=cur_month)
+
+    hours = Hours.objects.filter(month=cur_month)
+    if hours:
+        hours = hours[0]
+    else:
+        st_hours = {'tester_hours': 0, 'diff_hours': 0}
+        return st_hours
 
     if tester:
         tester = tester[0].name
