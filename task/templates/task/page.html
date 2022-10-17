@@ -98,7 +98,13 @@
                             <td class="t-state">{{ task.status }}</td>
                         {% endif %}
                         <td>{{ task.start }}</td>
-                        <td>{{ task.updated }}</td>
+                        {% if def_sel.state == '已完成' %}
+                            <td>{{ task.updated }}</td>
+                        {% else %}
+                            <td>{{ task.end }}</td>
+                        {% endif %}
+
+
                     </tr>
                 {% endfor %}
                 </tbody>
